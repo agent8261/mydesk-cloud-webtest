@@ -1,0 +1,13 @@
+
+.CanvasBorder
+{
+  border-style: dashed;
+  border-width: 3px;
+  border-color: red;
+  background-color:#ffffff;
+}
+
+body 
+{
+  background-color:#b0c4de;
+}

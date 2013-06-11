@@ -6,4 +6,6 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public interface DrawableFile extends IsSerializable
 {
   public void draw(Context2d context);
+  
+  public String getFileName();
 }

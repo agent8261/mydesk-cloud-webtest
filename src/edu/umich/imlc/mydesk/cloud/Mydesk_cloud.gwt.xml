@@ -7,7 +7,14 @@
 
 	<inherits name='com.google.gwt.user.User' />
 	
-	<inherits name='com.google.gwt.user.theme.clean.Clean' />
+  <inherits name='com.google.gwt.user.theme.standard.StandardResources'/>
+  
+	<!-- <inherits name='com.google.gwt.user.theme.clean.Clean' /> -->
+  <inherits name="com.google.gwt.resources.Resources" />
+  
+  <add-linker name="xsiframe" />
+
+  <stylesheet src="../standard.css" />
 	<stylesheet src='../Mydesk_cloud.css' />
 
 	<source path='frontend' />

@@ -2,129 +2,147 @@ package edu.umich.imlc.mydesk.cloud.frontend.canvas;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
-import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.MouseDownEvent;
-import com.google.gwt.event.dom.client.MouseDownHandler;
-import com.google.gwt.event.dom.client.MouseMoveEvent;
-import com.google.gwt.event.dom.client.MouseMoveHandler;
-import com.google.gwt.event.dom.client.MouseUpEvent;
-import com.google.gwt.event.dom.client.MouseUpHandler;
+import com.google.gwt.canvas.dom.client.CssColor;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.MouseWheelEvent;
 import com.google.gwt.event.dom.client.MouseWheelHandler;
+import com.google.gwt.event.logical.shared.AttachEvent;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-import edu.umich.imlc.mydesk.cloud.frontend.BasicView;
-
-public class Pan_Zoom_Canvas extends ResizeComposite 
-  implements BasicView, MouseDownHandler, MouseUpHandler,
-  MouseMoveHandler, MouseWheelHandler
+/**
+ * Pan and Zoom enabled canvas
+ */
+public class Pan_Zoom_Canvas extends Composite 
+  implements MouseWheelHandler
 {
-  static final String BORDER_STYLE = "canvasBorder";
-  private final String APP_TITLE_STYLE = "weSketchHeader";
-  static final int FRAME_INTERVAL = 15;  
-  static final double ZOOM_FACTOR = 2.0;
-  static final String TITLE_STYLE = "weSketchTitle";
-
-  final int canvas_width;
-  final int canvas_height;
+  static 
+  { DataCache.IMPL.canvasStyle().ensureInjected(); }
   
-  DockLayoutPanel view = null;
-  HorizontalPanel northPanel = null;
-  HorizontalPanel southPanel = null;
-  VerticalPanel titlePanel = null;
-  HorizontalPanel centerPanel = new HorizontalPanel();
+  protected static final double ZOOM_FACTOR = 1.5;
+  protected static final int FRAME_INTERVAL = 15;
+  protected static final int SUNK_EVENTS = Event.MOUSEEVENTS;
+  protected static final int MIN_HEIGHT = 200;
+  protected static final int MAX_HEIGHT = 650;
   
-  Canvas canvas = null;
-  Label lblTitle = new Label("Canvas");
-  Label appLabel = new Label("WeSketch");
+  static final String CSSCLASS_CANVAS_VIEWPORT = "pzCanvasViewport";
+  static final String CSSCLASS_HIDDEN_PANEL = "hiddenPanel";
   
-  boolean isAnimating = false;
-  boolean isZooming = false;
-  boolean isPanning = false;
+  static final double MAX_SCALE= 5.0;
+  static final double MIN_SCALE = 0.1;
   
-  int mouseX = 0;
-  int mouseY = 0;
+  protected Canvas viewport = null;  
+  protected Canvas backCanvas = null;
   
-  double orginX = 0;
-  double orginY = 0;  
-  double scale = 0.1;
+  protected Label lblTitle = new Label("Canvas");
+  protected Label lblApp = new Label("App Label");
+  protected Label lblDrag = new Label("Click & Drag to Resize!");
   
-  DrawableFile file = null;
-  Canvas_Timer canvasTimer = new Canvas_Timer();
-
+  InlineLabel iLblTitle = new InlineLabel("Canvas");
+  InlineLabel iLblDash = new InlineLabel(" - ");
+  InlineLabel iLblApp = new InlineLabel("App Label");
+  
+  protected VerticalPanel corePanel = new VerticalPanel();
+  protected FlowPanel canvasPanel = new FlowPanel();
+  protected FlowPanel headerPanel = new FlowPanel();
+  protected FlowPanel hiddenPanel = new FlowPanel();
+  
+  protected boolean isAnimating = false;
+  protected boolean isZooming = false;
+  protected boolean isPanning = false;
+  protected boolean isDragging = false;
+  
+  protected int world_width    = 0, world_height    = 0;
+  private int canvas_width   = 0, canvas_height   = 0;  
+  protected int mouseX = 0,         mouseY = 0;
+  protected int deltaY = 0;
+  protected int zoomCount = 0;
+  
+  protected double orginX = 0.0, orginY = 0.0;  
+  protected double scaleX = 1.0, scaleY = 1.0;
+  
+  protected DrawableFile file = null;
+  protected Canvas_Timer canvasTimer = null;
+  
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
 
-  public Pan_Zoom_Canvas
-    (int canvas_width, int canvas_height, double scale)
+  public Pan_Zoom_Canvas()
   {
-    this.canvas_width = canvas_width;
-    this.canvas_height = canvas_height;
-    this.scale = scale;
+    sinkEvents(SUNK_EVENTS);
+    corePanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+    initWidget(corePanel);
+  }
+  
+  // ---------------------------------------------------------------------------
+  
+  public void defaultInit(int canvas_width, int canvas_height, 
+      int world_width, int world_height)
+  {
+    this.world_width = world_width; this.world_height = world_height;
+    this.canvas_width = canvas_width; this.canvas_height = canvas_height;    
     
-    view = new DockLayoutPanel(Unit.PCT);
-    view.setHeight("95%");
-    view.setWidth("95%");
-    view.setStyleName
-      ("roundedCornersWide borderWidthMedium borderColorLightBlue borderStyleSolid paddingMedium marginThick");
-    lblTitle.setStyleName(TITLE_STYLE);
+    CanvasStyle css = DataCache.IMPL.canvasStyle();
+    backCanvas = Canvas.createIfSupported();
+    viewport = Canvas.createIfSupported();    
+    initCanvas(css);
+    initHeader(css);
     
-    northPanel = new HorizontalPanel();
-    northPanel.setWidth("100%");
-    northPanel.setHeight("100%");
-    northPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-    northPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-    appLabel.setStyleName(APP_TITLE_STYLE);
-    
-    titlePanel = new VerticalPanel();
-    titlePanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-    titlePanel.add(appLabel);
-    lblTitle.setStyleName(TITLE_STYLE);
-    titlePanel.add(lblTitle);
-    northPanel.add(titlePanel);
-    view.addNorth(northPanel, 10);
-    
-    canvas = Canvas.createIfSupported();
-    canvas.setStyleName(BORDER_STYLE);
-    canvas.setCoordinateSpaceHeight(canvas_height);
-    canvas.setCoordinateSpaceWidth(canvas_width);
-    
-    canvas.addMouseDownHandler(this);
-    canvas.addMouseMoveHandler(this);
-    canvas.addMouseUpHandler(this);
-    canvas.addMouseWheelHandler(this);
-    
-    centerPanel.setHeight("100%");
-    centerPanel.setWidth("100%");
-    centerPanel.setHorizontalAlignment(HorizontalPanel.ALIGN_CENTER);
-    centerPanel.add(canvas);
-    
-    view.add(centerPanel);
-    
-    initWidget(view);
-    view.setSize("800px", "600px");
+    hiddenPanel.setStyleName(css.hiddenElement());    
+    corePanel.add(hiddenPanel);
+    corePanel.add(headerPanel);
+    corePanel.add(canvasPanel);
+    corePanel.add(lblDrag);
   }
   
   // ---------------------------------------------------------------------------
   
   public void drawFile(DrawableFile file)
   {
-    this.file = file;
-    render();    
+    reset_Reload(file);
+    renderToBackCanvas();
+    render();
   }
   
   // ---------------------------------------------------------------------------
   
   public void setTitleLabel(String text)
   {
-    lblTitle.setText(text);
+    iLblTitle.setText(text);
+  }
+  
+  // ---------------------------------------------------------------------------
+  
+  public void setAppLabel(String text)
+  {
+    iLblApp.setText(text);
+  }
+  
+  // ---------------------------------------------------------------------------
+  
+  @Override
+  public void onBrowserEvent(Event event)
+  {
+    super.onBrowserEvent(event);
+    int type = event.getTypeInt();
+    
+    if((type & SUNK_EVENTS) != 0)
+      event.preventDefault();
+    
+    switch(type)
+    {
+      case Event.ONMOUSEDOWN: doMouseDown(event); break;
+      case Event.ONMOUSEMOVE: doMouseMove(event); break;
+      case Event.ONMOUSEOUT : doMouseOut(event) ; break;
+      case Event.ONMOUSEUP  : doMouseUp(event)  ; break;
+      default: break;
+    }
   }
   
   // ---------------------------------------------------------------------------
@@ -132,164 +150,331 @@ public class Pan_Zoom_Canvas extends ResizeComposite
   @Override
   public void onMouseWheel(MouseWheelEvent event)
   {
-    if(isPanning)
+    if(isPanning || isDragging)
       return;
     
     isZooming = true;
-    double dir = (event.isNorth())? 1 : -1;    
-    double zoom = Math.pow(ZOOM_FACTOR, dir);
+    int dir = (event.isNorth())? 1 : -1;    
+    double zoom = Math.pow(ZOOM_FACTOR, (double)dir);
+    double zoomX = scaleX * zoom;
+    double zoomY = scaleY * zoom;
     
-    Point p = toWorld(event.getX(), event.getY());
-    orginX = orginX + scale * p.x - scale * zoom * p.x;
-    orginY = orginY + scale * p.y - scale * zoom * p.y;
-    scale *= zoom;
-    render();
-  }
-  
-  // ---------------------------------------------------------------------------
-  
-  @Override
-  public void onMouseDown(MouseDownEvent event)
-  {
-    if(isZooming)
-      return;
-    isPanning = true;
-    mouseX = event.getX();
-    mouseY = event.getY();
-    startAnimation();
-  }
- 
-  // ---------------------------------------------------------------------------
-  
-  @Override
-  public void onMouseUp(MouseUpEvent event)
-  {
-    doMouseMove(event.getX(), event.getY());
-    isPanning = false;
-    if(!isZooming)
-      stopAnimation();
-  }
-  
-  // ---------------------------------------------------------------------------
-  
-  @Override
-  public void onMouseMove(MouseMoveEvent event)
-  {
-    doMouseMove(event.getX(), event.getY());
-  }
-  
-  // ---------------------------------------------------------------------------
-  
-  private void doMouseMove(int x, int y)
-  {
-    if(isPanning)
+    if((zoomX > MAX_SCALE) || (zoomY > MAX_SCALE) || 
+       (zoomX < MIN_SCALE) || (zoomY < MIN_SCALE))
     {
-      int tx = (x - mouseX);
-      int ty = (y - mouseY);
-      
-      orginX = tx  + orginX;
-      orginY = ty  + orginY;
-      mouseX = x; mouseY = y;
+      isZooming = false; return;
+    }
+    zoomCount += dir;
+    Vec2d p = toWorld(event.getX(), event.getY());
+    orginX = orginX + (scaleX * p.a1) - (zoomX * p.a1);
+    orginY = orginY + (scaleY * p.a2) - (zoomY * p.a2);
+    scaleX = zoomX;
+    scaleY = zoomY;
+    render();
+    isZooming = false;
+  }
+  
+  // ---------------------------------------------------------------------------
+  
+  protected void doMouseDown(Event event)
+  {
+    Element e = Element.as(event.getEventTarget());
+    if(e == lblDrag.getElement())
+    {
+      if(isPanning || isZooming)
+        return;
+      isDragging = true;
+      mouseY = event.getClientY();
+    }
+    else if(e == viewport.getElement())
+    {
+      if(isZooming || isDragging)
+        return;
+      isPanning = true;
+      Vec2i p = getViewMouseCoords(event);
+      mouseX = p.a1; mouseY = p.a2;
+      deltaY = 0;
+      startAnimation();
     }
   }
   
   // ---------------------------------------------------------------------------
   
-  private void render()
+  protected void doMouseMove(Event event)
   {
-    Context2d context = canvas.getContext2d();
-    context.save();
-    context.clearRect(0, 0, canvas_width, canvas_height);
-    drawGrid(context);
+    doPan(event);
+    doDrag(event);
+  }
+  
+  // ---------------------------------------------------------------------------
+  
+  protected void doMouseOut(Event event)
+  {
+    if(isPanning)
+      finishPan(event);
+    else if(isDragging)
+    {
+      Element e = Element.as(event.getEventTarget());
+      if((e == viewport.getElement()) || (e == lblDrag.getElement()))
+        return;
+      finishDrag(event);
+    }
+  }
+  
+  // ---------------------------------------------------------------------------
+  
+  protected void doMouseUp(Event event)
+  {
+    if(isPanning)
+      finishPan(event);
+    else if(isDragging)
+      finishDrag(event);
+  }
+  
+  // ---------------------------------------------------------------------------
+  
+  protected void doPan(Event event)
+  {
+    if(isPanning)
+    {
+      Vec2i p = getViewMouseCoords(event);
+      orginX = (p.a1 - mouseX)  + orginX;
+      orginY = (p.a2 - mouseY)  + orginY;            
+      mouseX = p.a1; mouseY = p.a2;
+    }
+  }
+  
+  // ---------------------------------------------------------------------------
+  
+  protected void doDrag(Event event)
+  {
+    if(isDragging)
+    {
+      int dy = event.getClientY() - mouseY;      
+      int newHeight = canvas_height + dy;
+      if((newHeight < MIN_HEIGHT) || (newHeight > MAX_HEIGHT))
+        return;
+      deltaY = dy;
+      viewport.setCoordinateSpaceHeight(getCanvasHeight());
+      viewport.setCoordinateSpaceWidth(getCanvasWidth());
+      render();
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  
+  protected void finishDrag(Event event)
+  {
+    assert(isDragging);
+    doDrag(event);
+    canvas_height += deltaY;
+    deltaY = 0;
+    isDragging = false;
+  }
+  
+  // ---------------------------------------------------------------------------
+  
+  protected void finishPan(Event event)
+  {
+    assert(isPanning);
+    doPan(event);
+    stopAnimation();
+    isPanning = false;
+  }
+  
+  // ---------------------------------------------------------------------------
+  
+  protected int getCanvasWidth()
+  {
+    return (getCanvasHeight() * world_width) / world_height;
+  }
+  
+  // ---------------------------------------------------------------------------
+  
+  protected int getCanvasHeight()
+  {
+    return canvas_height + deltaY;
+  }
+  
+  // ---------------------------------------------------------------------------
+  
+  protected void printOrgin()
+  {
+    System.out.println("Orgin x: " + orginX + " y: " + orginY);
     
+  }
+  // ---------------------------------------------------------------------------
+  
+  protected void render()
+  {
+    Context2d context = viewport.getContext2d();
+    context.clearRect(0, 0, getCanvasWidth(), getCanvasHeight());
+    renderViewPort(context);
+  }
+  
+  // ---------------------------------------------------------------------------
+  
+  protected void renderViewPort(Context2d context)
+  {
+    context.save();       
     context.translate(orginX, orginY);
-    context.scale(scale, scale);
+    context.scale(scaleX, scaleY);
+    context.drawImage(backCanvas.getCanvasElement(), 0, 0, 
+        world_width, world_height, 0, 0, getCanvasWidth(), getCanvasHeight());    
+    context.restore();
+  }
+  
+  // ---------------------------------------------------------------------------
+  
+  protected void drawText(Context2d context)
+  {
+    context.save();
+    int x = 65;
+    int y = getCanvasHeight()/2 + 35;
     
-    if(isZooming)
-      isZooming = false;
-    
+    String text = "[" + zoomCount + "] Scale X: " + scaleX + " Y: " + scaleY; 
+    context.setStrokeStyle("blue");
+    context.fillText(text, x, y);
+    context.strokeText(text, x, y);
+    context.restore();
+  }
+  
+  // ---------------------------------------------------------------------------
+  
+  protected void renderToBackCanvas()
+  {
+    Context2d context = backCanvas.getContext2d();
+    context.save();
+    context.clearRect(0, 0, world_width, world_height);
     if(file == null)
       drawTestScene(context);
     else
-      file.draw(context);
-    
+      file.draw(context);      
     context.restore();
   }
   
   // ---------------------------------------------------------------------------
   
-  private void drawGrid(Context2d context)
-  {
-    context.save();
-    context.setStrokeStyle("rgb(200,0,0)");
-  
-    context.setLineWidth(1);
-    context.beginPath();
-    context.moveTo(200, 0);
-    context.lineTo(200, canvas.getCoordinateSpaceHeight());
-    context.stroke();
-    
-    context.setLineWidth(1);
-    context.beginPath();
-    context.moveTo(0,200);
-    context.lineTo(canvas.getCoordinateSpaceWidth(), 200);
-    context.stroke();
-    context.restore();
-  }
-  
-  // ---------------------------------------------------------------------------
-  
-  private void drawTestScene(Context2d context)
+  protected void drawTestScene(Context2d context)
   {
     context.setFillStyle("rgb(200,0,0)");
-    context.fillRect(0, 0, 55, 50);
-    
+    context.fillRect(0, 0, 550, 500);    
     context.setFillStyle("rgba(0, 0, 200, 0.5)");
-    context.fillRect(20, 20, 55, 50);
+    context.fillRect(200, 200, 550, 500);
+    context.fillRect(1750, 1750, 500, 500);
+    
+    for (int i=0; i<6 ;i++)
+    {
+      for (int j=0; j<6 ;j++)
+      {
+        int g = (int) Math.floor(255.0 - 42.5 *i);
+        int b = (int) Math.floor(255.0 - 42.5 *j);
+        context.setFillStyle(CssColor.make(g, b, 0));
+        double x = 600 + j * 250.0;
+        double y = i * 250.0;
+        context.fillRect(x , y, 250, 250);
+      }
+    }
   }
   
   // ---------------------------------------------------------------------------
   
-  private void startAnimation()
+  protected void startAnimation()
   {
     if(!isAnimating)
     {
+      assert(canvasTimer == null);
+      canvasTimer = new Canvas_Timer();
       isAnimating = true;
       canvasTimer.scheduleRepeating(FRAME_INTERVAL);
-    }    
+    }
   }
   
   // ---------------------------------------------------------------------------
   
-  private void stopAnimation()
+  protected void stopAnimation()
   {
+    if(canvasTimer != null)
+      canvasTimer.cancel();
+    canvasTimer = null;
     isAnimating = false;
-    canvasTimer.cancel();
     //TODO: slippery pan
   }
+
+  // ---------------------------------------------------------------------------
+  
+  protected void initHeader(CanvasStyle css)
+  {
+    headerPanel.add(iLblTitle);
+    headerPanel.add(iLblDash);
+    headerPanel.add(iLblApp);
+    headerPanel.setStyleName(css.pzCanvasHeader());
+  }
+
+  // ---------------------------------------------------------------------------
+  
+  protected void initCanvas(CanvasStyle css)
+  {
+    backCanvas.setCoordinateSpaceWidth(world_width);
+    backCanvas.setCoordinateSpaceHeight(world_height);
+        
+    viewport.getElement().setClassName(CSSCLASS_CANVAS_VIEWPORT);
+    viewport.setStyleName(css.pzCanvasContext());
+    viewport.addStyleName(css.outlineOn());
+    viewport.setCoordinateSpaceWidth(canvas_width);
+    viewport.setCoordinateSpaceHeight(canvas_height);
+    viewport.addMouseWheelHandler(this);    
+    canvasPanel.add(viewport);
+    hiddenPanel.add(backCanvas);
+  }
   
   // ---------------------------------------------------------------------------
   
-  // might be useful for slippery pan. unused now
-  double easeOut( double time, double start, double end, double duration ) 
+  protected void reset_Reload(DrawableFile file)
   {
-    return end * ( ( time = time / duration - 1.0 ) * time * time + 1.0 ) + start;
+    this.file = file;
+    if(file != null)
+      setTitleLabel(file.getFileName());
+    else
+      setTitleLabel("Test File");
+    
+    mouseX = mouseY = deltaY = 0; // Reset the zoom & pan
+    orginX = orginY = 0.0; scaleX = scaleY = 1.0;
+    isAnimating = isZooming = isPanning = isDragging = false;
+  }
+
+  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  
+  protected class Vec2d
+  {
+    double a1;
+    double a2;
+  }
+  
+  protected Vec2d toWorld(int viewX, int viewY)
+  {
+    Vec2d p = new Vec2d();
+    p.a1 = (viewX - orginX) / scaleX;
+    p.a2 = (viewY - orginY) / scaleY;
+    //System.out.println("World x: " + p.a1 + " y: " + p.a2);
+    return p;
   }
   
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
   
-  private class Point
+  protected class Vec2i
   {
-    double x;
-    double y;
+    int a1;
+    int a2;
   }
   
-  private Point toWorld(int screenX, int screenY)
+  protected Vec2i getViewMouseCoords(Event event)
   {
-    Point p = new Point();
-    p.x = (screenX - orginX) / scale;
-    p.y = (screenY - orginY) / scale;
+    Vec2i p = new Vec2i();
+    p.a1 = event.getClientX() - viewport.getAbsoluteLeft();
+    p.a2 = event.getClientY() - viewport.getAbsoluteTop();
     return p;
   }
   
@@ -297,7 +482,7 @@ public class Pan_Zoom_Canvas extends ResizeComposite
   // ---------------------------------------------------------------------------
   
   // Draws the canvas 33.33fps if FRAME_INTERVAL = 30;
-  private class Canvas_Timer extends Timer
+  protected class Canvas_Timer extends Timer
   {
     @Override
     public void run()
@@ -305,6 +490,30 @@ public class Pan_Zoom_Canvas extends ResizeComposite
       render();
     }   
   }
-
-  // ---------------------------------------------------------------------------
+  
+  // ------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
+  
+  protected class CanvasAttach implements AttachEvent.Handler
+  {
+    @Override
+    public void onAttachOrDetach(AttachEvent event)
+    {
+      printElementsPosition(viewport.getElement(), "Viewport");
+      printElementsPosition(lblApp.getElement(), "App Label");
+      printElementsPosition(lblDrag.getElement(), "Drag Label");
+    }
+    
+    public void printElementsPosition(Element e, String header)
+    {
+      String s = "Abs Left: " + e.getAbsoluteLeft() + " top: " + e.getAbsoluteTop();
+      String r = "Left : " + e.getOffsetLeft() + " top: " + e.getOffsetTop();
+      System.out.println(header);
+      System.out.println(s);
+      System.out.println(r);
+      System.out.println("");
+    }
+  }
+  
+  // ---------------------------------------------------------------------------  
 }

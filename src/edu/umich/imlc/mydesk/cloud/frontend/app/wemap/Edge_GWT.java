@@ -5,7 +5,7 @@ import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.CssColor;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-import edu.umich.imlc.mydesk.cloud.frontend.ColorUtil;
+import edu.umich.imlc.mydesk.cloud.frontend.utilities.ColorUtil;
 
 public class Edge_GWT extends WeMapObject_GWT implements IsSerializable
 {

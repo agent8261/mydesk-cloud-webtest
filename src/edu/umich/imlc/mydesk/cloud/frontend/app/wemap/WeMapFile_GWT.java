@@ -10,8 +10,8 @@ import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.CssColor;
 
-import edu.umich.imlc.mydesk.cloud.frontend.ColorUtil;
 import edu.umich.imlc.mydesk.cloud.frontend.canvas.DrawableFile;
+import edu.umich.imlc.mydesk.cloud.frontend.utilities.ColorUtil;
 
 public class WeMapFile_GWT implements DrawableFile
 {
@@ -201,16 +201,19 @@ public class WeMapFile_GWT implements DrawableFile
     Point_GWT point;
     Edge_GWT edge;
     
-    point = new Point_GWT(2500, 2864);
+    point = new Point_GWT(1500, 1864);
     base = new WeMapObject_GWT("fcf3efcb-97ef-4090-9f60-766ace344336", point, 0);
     nodeA = new Node_GWT(base);
-    nodeA.setTitle("Hello Wurld longer string!!!111111111");
+    nodeA.setTitle("Node A: This is a very long sentence!");
     file.getWeMapObjects().add(nodeA);
-    point = new Point_GWT(2934, 2762);
+    
+    point = new Point_GWT(1934, 1762);
     base = new WeMapObject_GWT("3be34c42-c8cb-4c59-b379-cb25a874d190", point, 0);
     nodeB = new Node_GWT(base);
+    nodeB.setTitle("Node B's Title");
     file.getWeMapObjects().add(nodeB);
-    base = new WeMapObject_GWT("asdfadsf", point , 0);
+    
+    base = new WeMapObject_GWT("Foo_Bar_", point , 0);    
     edge = new Edge_GWT(base);
     edge.setDirection(Direction_GWT.FORWARD);
     edge.setNodeA_ID("fcf3efcb-97ef-4090-9f60-766ace344336");
@@ -265,10 +268,39 @@ public class WeMapFile_GWT implements DrawableFile
   @Override
   public void draw(Context2d context)
   {
-    // TODO Auto-generated method stub
-    
+    for( WeMapObject_GWT object : objects )
+    {
+      if( object instanceof Edge_GWT )
+      {
+        Edge_GWT e = (Edge_GWT) object;
+        e.draw(context);
+      }
+    }
+
+    for( WeMapObject_GWT object : objects )
+    {
+      if( object instanceof Node_GWT )
+      {
+        Node_GWT e = (Node_GWT) object;
+        e.draw(context);
+      }
+    }
   }
 
+  // ---------------------------------------------------------------------------
+  
+  public void setEdgeFile()
+  {
+    for( WeMapObject_GWT object : objects )
+    {
+      if( object instanceof Edge_GWT )
+      {
+        Edge_GWT e = (Edge_GWT) object;
+        e.setFile(this);
+      }
+    }
+  }
+  
   // ---------------------------------------------------------------------------
 
 }// class

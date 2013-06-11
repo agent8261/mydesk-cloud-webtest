@@ -1,32 +1,63 @@
-@external two, three;
-.one{
-  color: white;
+
+/*@def BLUE #66C2FF;
+@def ORANGE #FFA319;
+@def GRAY #E3E3E3;
+@def BLACK #000000;*/
+
+
+
+.ctrl-Main {
+  margin: 15px;
+  padding: 10px;  
+  background-color: #E3E3E3; /* Gray Background */
 }
 
-.one {
-  background-color: black;
+.ctrl-West {
+  background-color: #66C2FF; /* Blue */  
+  outline-color: #FFA319; /* Orange */
+  outline-style: solid;
+  outline-width: medium;      
+  border-style:dashed;
+  border-width:5px;
+  border-color: green; /* Green */  
+  padding: 30px;
 }
 
-.two {
-  color: white;
-  background-color: black;
+.outlineOn {
+  padding: 3px;
+  outline-color: black; /* Black */
+  outline-style: solid;
+  outline-width: thin;
 }
 
-.three {
-  color: black;
-  background-color: white;
+.outlineOff {
+  padding: 3px;
+  outline-color: black; /* Black */
+  outline-style: none;
+  outline-width: thin;
 }
 
-.canvasBorder {
-  overflow: hidden;
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-  border-bottom-right-radius: 20px;
-  border-bottom-left-radius: 20px;
+.alignCenter {
+  /*width:99%;*/
+  /*margin:0 auto;
+  position:absolute; 
+  top:50%;*/
+  margin-left:auto;
+  margin-right:auto;
+  text-align: center;
+}
+
+.WeSketch-SlideCtrl {
+  margin-left:auto;
+  margin-right:auto;
+}
+
+.pzCanvas-border {
+  /*overflow: hidden;*/
+  border-style: solid;
   border-width: 3px;
   border-color: lightskyblue;
-  padding: .5em;
-  margin: 1em;
+  padding: 20px;
   -moz-border-radius-topleft: 20px;
   -moz-border-radius-topright: 20px;
   -moz-border-radius-bottomright: 20px;
@@ -35,4 +66,39 @@
   -webkit-border-top-right-radius: 20px;
   -webkit-border-bottom-right-radius: 20px;
   -webkit-border-bottom-left-radius: 20px;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+  border-bottom-left-radius: 20px;  
+}
+
+.pzCanvas-context {
+  background-color: white;
+  /*margin-left: 5px;
+  margin-right: 5px;*/
+  text-align: center;
+}
+
+.pzCanvas-title {
+  text-align: center;
+  font: helvetica;
+  color: black;
+  font-size: 18px;
+}
+
+.pzCanvas-header {
+  text-align: center;
+	font: helvetica;
+	color: black;
+	font-size: 24px;
+}
+
+.contentPane {
+	width: 100%;
+	height: 100%;
+}
+
+.hiddenElement {
+	background-color: white;
+	display: none;
 }

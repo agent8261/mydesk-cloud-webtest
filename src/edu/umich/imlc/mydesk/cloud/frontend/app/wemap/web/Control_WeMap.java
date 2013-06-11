@@ -1,42 +1,44 @@
 package edu.umich.imlc.mydesk.cloud.frontend.app.wemap.web;
 
+import com.google.gwt.user.client.ui.FlowPanel;
+
 import edu.umich.imlc.mydesk.cloud.frontend.BasicPresenterClass;
 import edu.umich.imlc.mydesk.cloud.frontend.BasicView;
 import edu.umich.imlc.mydesk.cloud.frontend.app.wemap.WeMapFile_GWT;
-import edu.umich.imlc.mydesk.cloud.frontend.canvas.Pan_Zoom_Canvas;
-import edu.umich.imlc.mydesk.cloud.frontend.wesketch.WeSketchFile_GWT;
+import edu.umich.imlc.mydesk.cloud.frontend.app.wesketch.WeSketchFile_GWT;
+import edu.umich.imlc.mydesk.cloud.frontend.app.wesketch.web.WeSketchView;
+import edu.umich.imlc.mydesk.cloud.frontend.canvas.CanvasStyle;
+import edu.umich.imlc.mydesk.cloud.frontend.canvas.DataCache;
 
 public class Control_WeMap extends BasicPresenterClass
 {
   static final String FILE_NAME = "dummyFile";
   
-  static final int WEMAP_WIDTH = 400;
-  static final int WEMAP_HEIGHT = 400;
-  static final double WEMAP_SCALE = 0.1;
-  
-  static final int WESKETCH_WIDTH = 0;
-  static final int WESKETCH_HEIGHT = 0;  
-  static final double WESKETCH_SCALE = 0.0;
-  
   WeMapFile_GWT mapfile = null;
   WeSketchFile_GWT skfile = null;
   
-  Pan_Zoom_Canvas mapcanvas = null;
-  Pan_Zoom_Canvas skcanvas = null;
+  WeMapView mapView = null;
+  WeSketchView skView = null;
+    
+  FlowView corePanel = new FlowView();
   
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
   
   public Control_WeMap()
   {
-    loadWeMapFile();
-  }  
+    CanvasStyle css = DataCache.IMPL.canvasStyle();
+    corePanel.setStyleName(css.outlineOff());
+    mapView = new WeMapView();
+    switchToMap();
+  }
 
   // ---------------------------------------------------------------------------
   
   public void doCanvasTest()
   {
-    mapcanvas.drawFile(null);
+    switchToMap();
+    mapView.drawFile(null);
   }
 
   // ---------------------------------------------------------------------------
@@ -44,7 +46,8 @@ public class Control_WeMap extends BasicPresenterClass
   public void doWeMapTest()
   {    
     assert(mapfile != null);
-    mapcanvas.drawFile(mapfile);
+    switchToMap();
+    mapView.drawFile(mapfile);
   }
   
   // ---------------------------------------------------------------------------
@@ -52,7 +55,8 @@ public class Control_WeMap extends BasicPresenterClass
   public void doSketchTest()
   {
     assert(skfile != null);
-    skcanvas.drawFile(skfile);
+    switchToSketch();
+    skView.drawFile(skfile);
   }
   
   // ---------------------------------------------------------------------------
@@ -60,15 +64,15 @@ public class Control_WeMap extends BasicPresenterClass
   @Override
   public BasicView getView()
   {
-    return mapcanvas;
+    return corePanel;
   }
   
   // ---------------------------------------------------------------------------
   
   public void loadSketchFile()
   {
-    if(skcanvas == null)
-      skcanvas = new Pan_Zoom_Canvas(WESKETCH_WIDTH, WESKETCH_HEIGHT, WESKETCH_SCALE);
+    if(skView == null)
+      skView = new WeSketchView();
       
     if(skfile == null)
       skfile = WeSketchFile_GWT.makeDummyFile(FILE_NAME);
@@ -78,11 +82,38 @@ public class Control_WeMap extends BasicPresenterClass
   
   public void loadWeMapFile()
   {
-    if(mapcanvas == null)
-      mapcanvas = new Pan_Zoom_Canvas(WEMAP_WIDTH, WEMAP_HEIGHT, WEMAP_SCALE);
+    if(mapView == null)
+      mapView = new WeMapView();
     
     if(mapfile == null)
+    {
       mapfile = WeMapFile_GWT.makeDummyFile(FILE_NAME);
+      mapfile.setEdgeFile();
+    }
+  }
+  
+  // ---------------------------------------------------------------------------
+  
+  void switchToMap()
+  {
+    corePanel.clear();
+    corePanel.add(mapView.asWidget());
+  }
+  
+  // ---------------------------------------------------------------------------
+  
+  void switchToSketch()
+  {
+    corePanel.clear();
+    corePanel.add(skView.asWidget());
+  }
+  
+  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  
+  public static class FlowView extends FlowPanel implements BasicView
+  {
+    
   }
   
   // ---------------------------------------------------------------------------

@@ -32,7 +32,7 @@ public class WeMapView extends Composite implements BasicView
   private static final double IMPLIED_SCALE = CANVAS_WIDTH / (double)WORLD_WIDTH;
   private static final String APP_LABEL = "WeMap";
   
-  private WeMapCanvas pzCanvas = new WeMapCanvas();
+  private WeMapCanvas mapCanvas = new WeMapCanvas();
   private FlowPanel corePanel = new FlowPanel();
   private VerticalPanel contentPanel = new VerticalPanel();
   
@@ -48,7 +48,7 @@ public class WeMapView extends Composite implements BasicView
     contentPanel.setStyleName(css.contentPane());
     contentPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
     
-    contentPanel.add(pzCanvas);
+    contentPanel.add(mapCanvas);
     corePanel.add(contentPanel);
     initWidget(corePanel);
   }
@@ -57,7 +57,7 @@ public class WeMapView extends Composite implements BasicView
   
   public void drawFile(WeMapFile_GWT file)
   {
-    pzCanvas.drawFile(file);      
+    mapCanvas.drawFile(file);      
   }
   
   // ===========================================================================
@@ -80,7 +80,7 @@ public class WeMapView extends Composite implements BasicView
     
     public WeMapCanvas()
     {
-      defaultInit(CANVAS_WIDTH, CANVAS_HEIGHT, WORLD_WIDTH, WORLD_HEIGHT);      
+      defaultInit(CANVAS_WIDTH, CANVAS_HEIGHT, WORLD_WIDTH, WORLD_HEIGHT);    
       setAppLabel(APP_LABEL);
     }
     

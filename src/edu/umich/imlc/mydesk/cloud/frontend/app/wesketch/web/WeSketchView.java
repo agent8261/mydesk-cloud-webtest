@@ -5,9 +5,8 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.umich.imlc.mydesk.cloud.frontend.BasicView;
@@ -26,44 +25,22 @@ public class WeSketchView extends Composite implements BasicView
     
   private static final String APP_LABEL = "WeSketch";
   
-  private WeSketchFile_GWT file = null;
-  
+  private WeSketchFile_GWT sketchfile = null;  
   private FlowPanel corePanel = new FlowPanel();
   private VerticalPanel contentPanel = new VerticalPanel();  
-  private Grid slideCtrl = new Grid(1,4);
-  
-  private Pan_Zoom_Canvas pzCanvas = null;    
-  private Button nextSlideBtn = new Button(">");
-  private Button prevSlideBtn = new Button("<");
-  
-  private Label currentSlideIndexLbl = new Label("0");
-  private Label totalSlidesLbl = new Label("/ 0");
+  private WeSketchCanvas sketchCanvas = new WeSketchCanvas();
   
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
   
   public WeSketchView()
   {
-    pzCanvas = new Pan_Zoom_Canvas();
-    pzCanvas.defaultInit(CANVAS_WIDTH, CANVAS_HEIGHT, WORLD_WIDTH, WORLD_HEIGHT);
-    pzCanvas.setAppLabel(APP_LABEL);    
-
     CanvasStyle css = DataCache.IMPL.canvasStyle();
     corePanel.setStyleName(css.pzCanvasBorder());
-    slideCtrl.setStyleName(css.WeSketchSlideCtrl());
+    
     contentPanel.setStyleName(css.contentPane());
     contentPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-    
-    prevSlideBtn.addClickHandler(new DoPrevSlideHandler());
-    nextSlideBtn.addClickHandler(new DoNextSlideHandler());
-    
-    slideCtrl.setWidget(0, 0, prevSlideBtn);
-    slideCtrl.setWidget(0, 1, currentSlideIndexLbl);
-    slideCtrl.setWidget(0, 2, totalSlidesLbl);
-    slideCtrl.setWidget(0, 3, nextSlideBtn);
-    
-    //pzCanvas.add(slideCtrl);
-    contentPanel.add(pzCanvas);
+    contentPanel.add(sketchCanvas);    
     corePanel.add(contentPanel);
     initWidget(corePanel);
   }
@@ -72,48 +49,83 @@ public class WeSketchView extends Composite implements BasicView
   
   public void drawFile(WeSketchFile_GWT file)
   {
-    this.file = file;
-    assert(this.file != null);
-    String total = "/ " + file.getTotalSlides();
-    totalSlidesLbl.setText(total);
-    updateSlideControls();
+    sketchfile = file;
+    assert(sketchfile != null);
+    sketchCanvas.drawSketchFile();
   }
   
-  // ---------------------------------------------------------------------------
+  // ===========================================================================
+  // ===========================================================================
   
-  private void updateSlideControls()
+  private class WeSketchCanvas extends Pan_Zoom_Canvas implements ClickHandler
   {
-    int index = file.getCurrentSlideIndex();
-    currentSlideIndexLbl.setText(String.valueOf(index + 1));
-    nextSlideBtn.setEnabled(file.hasNextSlide());
-    prevSlideBtn.setEnabled(file.hasPrevSlide());
-    pzCanvas.drawFile(file);
-  }
-  
-  // ---------------------------------------------------------------------------
-  // ---------------------------------------------------------------------------
-  
-  class DoNextSlideHandler implements ClickHandler
-  {
+    private Button nextSlideBtn = new Button(">");
+    private Button prevSlideBtn = new Button("<");
+    
+    private FlowPanel slideCtrlPanel = new FlowPanel();
+    private InlineLabel iLblCurrentSlide = new InlineLabel(" 0");
+    private InlineLabel iLblSlash = new InlineLabel(" / ");
+    private InlineLabel iLblTotalSlides = new InlineLabel("0 ");
+    
+    // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    
+    public WeSketchCanvas()
+    {
+      defaultInit(CANVAS_WIDTH, CANVAS_HEIGHT, WORLD_WIDTH, WORLD_HEIGHT);
+      setAppLabel(APP_LABEL);      
+      prevSlideBtn.addClickHandler(this);
+      nextSlideBtn.addClickHandler(this);
+      
+      slideCtrlPanel.add(prevSlideBtn);
+      slideCtrlPanel.add(iLblCurrentSlide);
+      slideCtrlPanel.add(iLblSlash);
+      slideCtrlPanel.add(iLblTotalSlides);
+      slideCtrlPanel.add(nextSlideBtn);
+    }
+    
+    // ---------------------------------------------------------------------------
+    
+    public void drawSketchFile()
+    {
+      iLblTotalSlides.setText(sketchfile.getTotalSlides() + " ");
+      updateSlideControls();      
+    }
+    
+    // ---------------------------------------------------------------------------
+    
     @Override
     public void onClick(ClickEvent event)
     {
-      file.doNextSlide();
+      if(event.getSource() == nextSlideBtn)
+        sketchfile.doNextSlide();
+      else
+        sketchfile.doPrevSlide();
       updateSlideControls();
     }
-  }
-  
-  // ---------------------------------------------------------------------------
-  // ---------------------------------------------------------------------------
-  
-  class DoPrevSlideHandler implements ClickHandler
-  {
+    
+    // ---------------------------------------------------------------------------
+    
     @Override
-    public void onClick(ClickEvent event)
+    protected void initCanvas(CanvasStyle css)
     {
-      file.doPrevSlide();
-      updateSlideControls();
+      super.initCanvas(css);
+      canvasPanel.add(slideCtrlPanel);
     }
-  }
+    
+    // ---------------------------------------------------------------------------
+    
+    private void updateSlideControls()
+    {
+      int index = sketchfile.getCurrentSlideIndex() + 1;
+      iLblCurrentSlide.setText(" " + index);
+      nextSlideBtn.setEnabled(sketchfile.hasNextSlide());
+      prevSlideBtn.setEnabled(sketchfile.hasPrevSlide());
+      drawFile(sketchfile);
+    }
+    
+    // -------------------------------------------------------------------------
+  } // End WeSketchCanvas
+  
   // ---------------------------------------------------------------------------
 }

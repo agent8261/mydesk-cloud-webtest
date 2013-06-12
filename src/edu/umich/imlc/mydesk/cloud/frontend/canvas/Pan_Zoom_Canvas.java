@@ -40,13 +40,10 @@ public class Pan_Zoom_Canvas extends Composite
   protected Canvas viewport = null;  
   protected Canvas backCanvas = null;
   
-  protected Label lblTitle = new Label("Canvas");
-  protected Label lblApp = new Label("App Label");
-  protected Label lblDrag = new Label("Click & Drag to Resize!");
-  
-  InlineLabel iLblTitle = new InlineLabel("Canvas");
-  InlineLabel iLblDash = new InlineLabel(" - ");
-  InlineLabel iLblApp = new InlineLabel("App Label");
+  protected Label lblDrag = new Label("Click & Drag to Resize!");  
+  protected InlineLabel iLblTitle = new InlineLabel("Canvas");
+  protected InlineLabel iLblDash = new InlineLabel(" - ");
+  protected InlineLabel iLblApp = new InlineLabel("App Label");
   
   protected VerticalPanel corePanel = new VerticalPanel();
   protected FlowPanel canvasPanel = new FlowPanel();
@@ -507,7 +504,6 @@ public class Pan_Zoom_Canvas extends Composite
     public void onAttachOrDetach(AttachEvent event)
     {
       printElementsPosition(viewport.getElement(), "Viewport");
-      printElementsPosition(lblApp.getElement(), "App Label");
       printElementsPosition(lblDrag.getElement(), "Drag Label");
     }
     

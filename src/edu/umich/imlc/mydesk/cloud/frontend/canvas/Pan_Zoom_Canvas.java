@@ -310,7 +310,7 @@ public class Pan_Zoom_Canvas extends Composite
     Context2d context = viewport.getContext2d();
     context.clearRect(0, 0, getCanvasWidth(), getCanvasHeight());
     renderViewPort(context);
-    drawText(context);
+    //drawText(context);
   }
   
   // ---------------------------------------------------------------------------

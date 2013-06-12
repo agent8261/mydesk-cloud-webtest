@@ -2,7 +2,6 @@ package edu.umich.imlc.mydesk.cloud.frontend.app.wemap.web;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
-import com.google.gwt.canvas.dom.client.CssColor;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
@@ -72,6 +71,8 @@ public class WeMapView extends Composite implements BasicView
     InlineLabel iLblSpace = null;
     int gridSpace = MIN_GRID_SPACING;
     int lineWidth = DEFAULT_LINE_WIDTH;
+    int width, height;
+    
     Vec2d origin = new Vec2d();
     
     // -------------------------------------------------------------------------
@@ -144,45 +145,41 @@ public class WeMapView extends Composite implements BasicView
     
     void drawGrid(Context2d context)
     {
-      int width = (int)Math.ceil(world_width * IMPLIED_SCALE);
-      int height = (int)Math.ceil(world_width * IMPLIED_SCALE);
       scaleGrid();
+      width = roundUp((int)Math.ceil(world_width * IMPLIED_SCALE));
+      height = roundUp((int)Math.ceil(world_height * IMPLIED_SCALE));
 
+      Line [] borders = new Line[4];
+      borders[0] = set(0.0, 0.0, 0.0, height);
+      borders[1] = set(0.0, 0.0, width, 0.0);
+      
       context.save();
-      context.setStrokeStyle("black");
-      context.setLineWidth(lineWidth * 2);
       context.translate(originX, originY);
       context.scale(scaleX, scaleY);
-      
-      context.beginPath();
-      context.moveTo(0.0, 0.0);
-      context.lineTo(0, height);
-      
-      context.moveTo(0.0, 0.0);
-      context.lineTo(width, 0.0);
-      context.stroke();
-      
       context.setLineWidth(lineWidth);
       context.setStrokeStyle("gray");
-      context.beginPath();
-      for(int i = 0; i < width; i += gridSpace)
-      {
-        context.moveTo(i, 0);
-        context.lineTo(i, height);
-      }
       
-      for(int i = 0; i < height; i += gridSpace)
+      context.beginPath();            
+      for(int j = 0; true; j += gridSpace)
       {
-        context.moveTo(0,i);
-        context.lineTo(width, i);        
+        drawLine(context, j, 0.0, j, height);
+        if(!(j < width))
+        {  j += gridSpace;  borders[2] = set(j, 0.0, j, height);  break;  }
       }
+      /*
+      for(int j = 0; true; j += gridSpace)
+      {
+        drawLine(context, 0.0, j, width, j);
+        if(!(j < height))
+        {  j += gridSpace;  borders[3] = set(0.0, j, width, j);  break;  }
+      }*/
       context.stroke();
+
+      //drawGridBorder(context, borders);
       context.restore();
-      //
     }
     
     // -------------------------------------------------------------------------
-    
     
     /**
      * Adjust the gridSpace:
@@ -198,32 +195,78 @@ public class WeMapView extends Composite implements BasicView
     void scaleGrid()
     {
       int worldSize = 
-          round((int)Math.floor(MIN_GRID_SPACING / (IMPLIED_SCALE * scaleX)));      
+          roundDown((int)Math.floor(MIN_GRID_SPACING / (IMPLIED_SCALE * scaleX)));      
       gridSpace = (int)Math.floor(worldSize * IMPLIED_SCALE * scaleX);
     }
     
     // -------------------------------------------------------------------------
     
-    void copyToBackCanvas()
+    void drawLine(Context2d context, double mX, double mY, double lX, double lY)
     {
-      Context2d context = backCanvas.getContext2d();
-      context.clearRect(0, 0, world_width, world_height);
-      context.drawImage(gridCanvas.getCanvasElement(), 0, 0, 
-          world_width, world_height, 0, 0, world_width, world_height);
+      context.moveTo(mX, lY); context.lineTo(lX, lY);
+    }
+    
+    // -------------------------------------------------------------------------
+    
+    void drawGridBorder(Context2d context, Line [] lines)
+    {
+      context.setStrokeStyle("black");
+      context.setLineWidth(lineWidth * 2);
+      
+      context.beginPath();
+      lines[0].draw(context);
+      lines[1].draw(context);
+      lines[2].draw(context);
+      //for(Line line: lines)
+        //line.draw(context);
+      context.stroke();      
     }
     
     // ---------------------------------------------------------------------------
     
-    int round(int numToRound) 
+    int roundDown(int numToRound) 
     { 
-      int remainder = numToRound % WEMAP_GRID_SPACING;     
-      if (remainder == 0)
-        return numToRound;
-       
-      //return (numToRound + WEMAP_GRID_SPACING - remainder);
-      return (numToRound - remainder);
-    } 
+      int r = numToRound % WEMAP_GRID_SPACING;
+      return (r == 0) ? numToRound : (numToRound - r);
+    }
+    
+    // ---------------------------------------------------------------------------
+    
+    int roundUp(int numToRound) 
+    { 
+      int r = numToRound % WEMAP_GRID_SPACING;
+      return (r == 0) ? numToRound : (numToRound + WEMAP_GRID_SPACING - r);
+    }
+    
+    // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    
+    /*
+     * Used for performance. 
+     * Saves location so line can be drawn later
+     */
+    class Line
+    {
+      double mX, mY;
+      double lX, lY;
+      
+      void draw(Context2d context)
+      {
+        drawLine(context, mX, mY, lX, lY);
+      }
+    } // End Line
+    
+    // --------------------------------------------------------------------------
+    
+    Line set(double mX, double mY, double lX, double lY)
+    {
+      Line l = new Line();
+      l.mX = mX; l.mY = mY; l.lX = lX; l.lY = lY;
+      return l;
+    }
+    
+    // --------------------------------------------------------------------------
   } // End WeMapCanvas
   
-  // ---------------------------------------------------------------------------
+  // ----------------------------------------------------------------------------
 }

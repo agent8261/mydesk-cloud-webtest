@@ -310,7 +310,6 @@ public class Pan_Zoom_Canvas extends Composite
     Context2d context = viewport.getContext2d();
     context.clearRect(0, 0, getCanvasWidth(), getCanvasHeight());
     renderViewPort(context);
-    //drawText(context);
   }
   
   // ---------------------------------------------------------------------------
@@ -443,7 +442,7 @@ public class Pan_Zoom_Canvas extends Composite
     else
       setTitleLabel("Test File");
     
-    mouseX = mouseY = deltaY = 0; // Reset the zoom & pan
+    mouseX = mouseY = deltaY = 0;
     originX = originY = 0.0; scaleX = scaleY = 1.0;
     isAnimating = isZooming = isPanning = isDragging = false;
   }
@@ -451,11 +450,13 @@ public class Pan_Zoom_Canvas extends Composite
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
   
-  protected class Vec2d
+  protected static class Vec2d
   {
     public double a1;
     public double a2;
     public Vec2d(){}
+    public Vec2d(double x, double y){ a1 = x; a2 = y; }
+    public Vec2d(Vec2d vec){ a1 = vec.a1; a2 = vec.a2; }
   }
   
   protected Vec2d toWorld(int viewX, int viewY)
@@ -469,7 +470,7 @@ public class Pan_Zoom_Canvas extends Composite
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
   
-  protected class Vec2i
+  protected static class Vec2i
   {
     public int a1;
     public int a2;

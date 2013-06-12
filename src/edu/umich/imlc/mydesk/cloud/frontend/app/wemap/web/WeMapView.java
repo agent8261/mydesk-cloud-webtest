@@ -23,8 +23,8 @@ public class WeMapView extends Composite implements BasicView
   private static final int CANVAS_HEIGHT = 400;
   private static final int WORLD_WIDTH = 4000;
   private static final int WORLD_HEIGHT = 4000;
-  private static final int WEMAP_GRID_SPACING = 40;
-  private static final int MIN_GRID_SPACING = 24;
+  private static final int WEMAP_SPACING = 40;
+  private static final int MIN_SPACING = 24;
   private static final int DEFAULT_LINE_WIDTH = 1;
   
   private static final double CENTER_X = 0.5 * CANVAS_WIDTH;
@@ -69,7 +69,7 @@ public class WeMapView extends Composite implements BasicView
     Button btnCenterMap = null;
     Button btnPrint = null;
     InlineLabel iLblSpace = null;
-    int gridSpace = MIN_GRID_SPACING;
+    int gridSpace = MIN_SPACING;
     int lineWidth = DEFAULT_LINE_WIDTH;
     int width, height;
     
@@ -143,15 +143,15 @@ public class WeMapView extends Composite implements BasicView
     
     // -------------------------------------------------------------------------
     
-    void drawGrid(Context2d context)
+    private void drawGrid(Context2d context)
     {
       scaleGrid();
-      width = roundUp((int)Math.ceil(world_width * IMPLIED_SCALE));
-      height = roundUp((int)Math.ceil(world_height * IMPLIED_SCALE));
+      width = roundUpToGrid((int)Math.ceil(world_width * IMPLIED_SCALE));
+      height = roundUpToGrid((int)Math.ceil(world_height * IMPLIED_SCALE));
 
       Line [] borders = new Line[4];
-      borders[0] = set(0.0, 0.0, 0.0, height);
-      borders[1] = set(0.0, 0.0, width, 0.0);
+      borders[0] = new Line(0.0, 0.0, 0.0, height);
+      borders[1] = new Line(0.0, 0.0, width, 0.0);
       
       context.save();
       context.translate(originX, originY);
@@ -160,22 +160,21 @@ public class WeMapView extends Composite implements BasicView
       context.setStrokeStyle("gray");
       
       context.beginPath();            
-      for(int j = 0; true; j += gridSpace)
+      for(int i = 0; true; i += gridSpace)
       {
-        drawLine(context, j, 0.0, j, height);
-        if(!(j < width))
-        {  j += gridSpace;  borders[2] = set(j, 0.0, j, height);  break;  }
+        drawLine(context, i, 0.0, i, height);
+        if(!(i < width))
+        { borders[2] = new Line(i, 0.0, i, height);  break;  }
+      }      
+      for(int i = 0; true; i += gridSpace)
+      {
+        drawLine(context, 0.0, i, width, i);
+        if(!(i < height))
+        { borders[3] = new Line(0.0, i, width, i);  break;  }
       }
-      /*
-      for(int j = 0; true; j += gridSpace)
-      {
-        drawLine(context, 0.0, j, width, j);
-        if(!(j < height))
-        {  j += gridSpace;  borders[3] = set(0.0, j, width, j);  break;  }
-      }*/
       context.stroke();
 
-      //drawGridBorder(context, borders);
+      drawGridBorder(context, borders);
       context.restore();
     }
     
@@ -192,50 +191,48 @@ public class WeMapView extends Composite implements BasicView
      *   2. round up to the nearest multiple of 40
      *   3. convert back to view coordinates
      */
-    void scaleGrid()
+    private void scaleGrid()
     {
       int worldSize = 
-          roundDown((int)Math.floor(MIN_GRID_SPACING / (IMPLIED_SCALE * scaleX)));      
+          roundDownTo40((int)Math.floor(MIN_SPACING / (IMPLIED_SCALE * scaleX)));     
       gridSpace = (int)Math.floor(worldSize * IMPLIED_SCALE * scaleX);
     }
     
     // -------------------------------------------------------------------------
     
-    void drawLine(Context2d context, double mX, double mY, double lX, double lY)
+    private void drawLine
+      (Context2d context, double mX, double mY, double lX, double lY)
     {
-      context.moveTo(mX, lY); context.lineTo(lX, lY);
+      context.moveTo(mX, mY); context.lineTo(lX, lY);
     }
     
     // -------------------------------------------------------------------------
     
-    void drawGridBorder(Context2d context, Line [] lines)
+    private void drawGridBorder(Context2d context, Line [] lines)
     {
       context.setStrokeStyle("black");
       context.setLineWidth(lineWidth * 2);
       
       context.beginPath();
-      lines[0].draw(context);
-      lines[1].draw(context);
-      lines[2].draw(context);
-      //for(Line line: lines)
-        //line.draw(context);
+      for(Line line: lines)
+        drawLine(context, line.mX, line.mY, line.lX, line.lY);
       context.stroke();      
     }
     
     // ---------------------------------------------------------------------------
     
-    int roundDown(int numToRound) 
+    private int roundDownTo40(int numToRound)
     { 
-      int r = numToRound % WEMAP_GRID_SPACING;
+      int r = numToRound % WEMAP_SPACING;
       return (r == 0) ? numToRound : (numToRound - r);
     }
     
     // ---------------------------------------------------------------------------
     
-    int roundUp(int numToRound) 
+    private int roundUpToGrid(int numToRound)
     { 
-      int r = numToRound % WEMAP_GRID_SPACING;
-      return (r == 0) ? numToRound : (numToRound + WEMAP_GRID_SPACING - r);
+      int r = numToRound % gridSpace;
+      return (r == 0) ? numToRound : (numToRound + gridSpace - r);
     }
     
     // -------------------------------------------------------------------------
@@ -245,25 +242,16 @@ public class WeMapView extends Composite implements BasicView
      * Used for performance. 
      * Saves location so line can be drawn later
      */
-    class Line
+    private static class Line
     {
       double mX, mY;
       double lX, lY;
       
-      void draw(Context2d context)
+      Line(double mX, double mY, double lX, double lY)
       {
-        drawLine(context, mX, mY, lX, lY);
+        this.mX = mX; this.mY = mY; this.lX = lX; this.lY = lY;
       }
     } // End Line
-    
-    // --------------------------------------------------------------------------
-    
-    Line set(double mX, double mY, double lX, double lY)
-    {
-      Line l = new Line();
-      l.mX = mX; l.mY = mY; l.lX = lX; l.lY = lY;
-      return l;
-    }
     
     // --------------------------------------------------------------------------
   } // End WeMapCanvas

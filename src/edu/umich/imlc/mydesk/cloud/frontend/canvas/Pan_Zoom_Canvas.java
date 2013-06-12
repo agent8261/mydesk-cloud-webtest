@@ -64,7 +64,7 @@ public class Pan_Zoom_Canvas extends Composite
   protected int deltaY = 0;
   protected int zoomCount = 0;
   
-  protected double orginX = 0.0, orginY = 0.0;  
+  protected double originX = 0.0, originY = 0.0;  
   protected double scaleX = 1.0, scaleY = 1.0;
   
   protected DrawableFile file = null;
@@ -166,8 +166,8 @@ public class Pan_Zoom_Canvas extends Composite
     }
     zoomCount += dir;
     Vec2d p = toWorld(event.getX(), event.getY());
-    orginX = orginX + (scaleX * p.a1) - (zoomX * p.a1);
-    orginY = orginY + (scaleY * p.a2) - (zoomY * p.a2);
+    originX = originX + (scaleX * p.a1) - (zoomX * p.a1);
+    originY = originY + (scaleY * p.a2) - (zoomY * p.a2);
     scaleX = zoomX;
     scaleY = zoomY;
     render();
@@ -238,8 +238,8 @@ public class Pan_Zoom_Canvas extends Composite
     if(isPanning)
     {
       Vec2i p = getViewMouseCoords(event);
-      orginX = (p.a1 - mouseX)  + orginX;
-      orginY = (p.a2 - mouseY)  + orginY;            
+      originX = (p.a1 - mouseX)  + originX;
+      originY = (p.a2 - mouseY)  + originY;            
       mouseX = p.a1; mouseY = p.a2;
     }
   }
@@ -298,11 +298,11 @@ public class Pan_Zoom_Canvas extends Composite
   
   // ---------------------------------------------------------------------------
   
-  protected void printOrgin()
+  protected void printOrigin()
   {
-    System.out.println("Orgin x: " + orginX + " y: " + orginY);
-    
+    System.out.println("Orgin x: " + originX + " y: " + originY);
   }
+  
   // ---------------------------------------------------------------------------
   
   protected void render()
@@ -310,6 +310,7 @@ public class Pan_Zoom_Canvas extends Composite
     Context2d context = viewport.getContext2d();
     context.clearRect(0, 0, getCanvasWidth(), getCanvasHeight());
     renderViewPort(context);
+    drawText(context);
   }
   
   // ---------------------------------------------------------------------------
@@ -317,7 +318,7 @@ public class Pan_Zoom_Canvas extends Composite
   protected void renderViewPort(Context2d context)
   {
     context.save();       
-    context.translate(orginX, orginY);
+    context.translate(originX, originY);
     context.scale(scaleX, scaleY);
     context.drawImage(backCanvas.getCanvasElement(), 0, 0, 
         world_width, world_height, 0, 0, getCanvasWidth(), getCanvasHeight());    
@@ -358,10 +359,14 @@ public class Pan_Zoom_Canvas extends Composite
   protected void drawTestScene(Context2d context)
   {
     context.setFillStyle("rgb(200,0,0)");
-    context.fillRect(0, 0, 550, 500);    
+    
+    double size = 24 * (scaleX * 10);
+    context.fillRect(0, 0, size, size);
+    
+    context.fillRect(400.0, 2400.0, 550.0, 500.0);
     context.setFillStyle("rgba(0, 0, 200, 0.5)");
-    context.fillRect(200, 200, 550, 500);
-    context.fillRect(1750, 1750, 500, 500);
+    context.fillRect(600.0, 2600.0, 550.0, 500.0);
+    context.fillRect(1750.0, 1750.0, 500.0, 500.0);
     
     for (int i=0; i<6 ;i++)
     {
@@ -370,9 +375,9 @@ public class Pan_Zoom_Canvas extends Composite
         int g = (int) Math.floor(255.0 - 42.5 *i);
         int b = (int) Math.floor(255.0 - 42.5 *j);
         context.setFillStyle(CssColor.make(g, b, 0));
-        double x = 600 + j * 250.0;
+        double x = 1400 + j * 250.0;
         double y = i * 250.0;
-        context.fillRect(x , y, 250, 250);
+        context.fillRect(x , y, 250.0, 250.0);
       }
     }
   }
@@ -439,7 +444,7 @@ public class Pan_Zoom_Canvas extends Composite
       setTitleLabel("Test File");
     
     mouseX = mouseY = deltaY = 0; // Reset the zoom & pan
-    orginX = orginY = 0.0; scaleX = scaleY = 1.0;
+    originX = originY = 0.0; scaleX = scaleY = 1.0;
     isAnimating = isZooming = isPanning = isDragging = false;
   }
 
@@ -448,16 +453,16 @@ public class Pan_Zoom_Canvas extends Composite
   
   protected class Vec2d
   {
-    double a1;
-    double a2;
+    public double a1;
+    public double a2;
+    public Vec2d(){}
   }
   
   protected Vec2d toWorld(int viewX, int viewY)
   {
     Vec2d p = new Vec2d();
-    p.a1 = (viewX - orginX) / scaleX;
-    p.a2 = (viewY - orginY) / scaleY;
-    //System.out.println("World x: " + p.a1 + " y: " + p.a2);
+    p.a1 = (viewX - originX) / scaleX;
+    p.a2 = (viewY - originY) / scaleY;
     return p;
   }
   
@@ -466,8 +471,9 @@ public class Pan_Zoom_Canvas extends Composite
   
   protected class Vec2i
   {
-    int a1;
-    int a2;
+    public int a1;
+    public int a2;
+    public Vec2i(){}
   }
   
   protected Vec2i getViewMouseCoords(Event event)

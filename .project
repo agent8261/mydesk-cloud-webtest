@@ -44,6 +44,11 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>MYDESK_CLOUD_SRC</name>
+			<type>2</type>
+			<locationURI>MYDESK_CLOUD_SRC</locationURI>
+		</link>
+		<link>
 			<name>MYDESK_COMMON</name>
 			<type>2</type>
 			<locationURI>MYDESK_COMMON</locationURI>

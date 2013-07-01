@@ -8,8 +8,9 @@
 	<inherits name='com.google.gwt.user.User' />
 	
   <inherits name='com.google.gwt.user.theme.standard.StandardResources'/>
+  <inherits name='com.emitrom.lienzo.Lienzo' />
+  <inherits name="com.google.gwt.inject.Inject"/>
   
-	<!-- <inherits name='com.google.gwt.user.theme.clean.Clean' /> -->
   <inherits name="com.google.gwt.resources.Resources" />
   
   <add-linker name="xsiframe" />
@@ -20,6 +21,6 @@
 	<source path='frontend' />
 	<source path='shared' />
   
-  <entry-point class="edu.umich.imlc.mydesk.cloud.frontend.MyDeskMain" />
+  <entry-point class="edu.umich.imlc.mydesk.cloud.frontend.AppTestMain" />
   
 </module>

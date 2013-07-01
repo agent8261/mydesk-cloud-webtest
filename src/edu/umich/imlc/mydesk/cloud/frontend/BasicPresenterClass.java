@@ -13,5 +13,7 @@ public abstract class BasicPresenterClass implements BasicPresenter
     viewContainer_.clear();
     viewContainer_.add(getView().asWidget());
   }
-
+  
+  // ---------------------------------------------------------------------------
+  
 }// class

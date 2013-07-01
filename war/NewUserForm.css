@@ -1,0 +1,28 @@
+
+/* Style Sheet */
+
+body {
+  background-color:white;
+  margin:0px;
+  padding:0px;
+}
+
+.outline-on {
+  margin:5px;
+  padding:2px;
+  outline-color: #000000;
+  outline-style: solid;
+  outline-width: 2px;
+}
+
+.outline-off{
+  margin:5px;
+  padding:2px;
+  outline-color: #b0c4de;
+  outline-style: solid;
+  outline-width: 2px;
+}
+
+.logoDiv{
+  background-color:black;
+}

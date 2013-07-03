@@ -8,6 +8,7 @@ import com.emitrom.lienzo.client.core.types.TextMetrics;
 import com.emitrom.lienzo.shared.core.types.ColorName;
 import com.emitrom.lienzo.shared.core.types.TextAlign;
 import com.emitrom.lienzo.shared.core.types.TextBaseLine;
+import com.google.gwt.core.shared.GWT;
 
 
 /*
@@ -15,15 +16,19 @@ import com.emitrom.lienzo.shared.core.types.TextBaseLine;
  */
 public class LienzoOvalNode implements DrawableObject
 {
+  static final DrawableObjectInjector appInjector = GWT.create(DrawableObjectInjector.class);
+  
   static final String DEFAULT_COLOR = "black";
-  static final double DEFAULT_NODE_WIDTH = 50;
-  static final double DEFAULT_NODE_HEIGHT = 30;
+  static final double DEFAULT_NODE_WIDTH = 500;
+  static final double DEFAULT_NODE_HEIGHT = 300;
   static final double TEXT_BOX_PADDING = 5.0;
   static final int MAX_TITLE_SIZE = 40;
+  static final double LINE_WIDTH = 10;
   
   static final String DEFAULT_FONT = "Helvetica";
   static final double DEFAULT_FONT_SIZE = 35;
   
+  //LieznoAppView appView = LieznoAppView.getInstance();
   Group groupShape = null;
   Ellipse ellipseShape = null;
   Text titleShape = null;
@@ -38,9 +43,10 @@ public class LienzoOvalNode implements DrawableObject
     (double x, double y, String color, String title, DrawingSurface drawingSurface)
   {
     assert(drawingSurface instanceof Layer);
-    System.out.println("Oval Location - x: " + x + " y: " + y);
+    //System.out.println("Oval Location - x: " + x + " y: " + y);
     this.title = title;
     groupShape = new Group();
+    groupShape.setDraggable(true);
     
     titleShape = new Text(" ", DEFAULT_FONT, DEFAULT_FONT_SIZE);
     titleShape.setX(x).setY(y).setFillColor(ColorName.BLACK)
@@ -51,7 +57,7 @@ public class LienzoOvalNode implements DrawableObject
     layer.add(groupShape);
     Size s = calcEllipseSize(x, y);
     ellipseShape = new Ellipse(s.w, s.h);
-    ellipseShape.setStrokeColor(color).setX(x).setY(y);
+    ellipseShape.setStrokeColor(color).setX(x).setY(y).setStrokeWidth(LINE_WIDTH);
     groupShape.add(ellipseShape);
   }
   
@@ -73,7 +79,7 @@ public class LienzoOvalNode implements DrawableObject
       double a = size.w * 0.5, f = urX * 0.5;
       size.h = Math.sqrt(a * a - f * f);
     }    
-    System.out.println("Oval Node Size w: " + size.w + " h: " + size.h);
+    //System.out.println("Oval Node Size w: " + size.w + " h: " + size.h);
     return size;
   }
   

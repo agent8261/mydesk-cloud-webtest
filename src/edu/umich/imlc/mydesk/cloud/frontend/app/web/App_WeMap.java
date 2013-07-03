@@ -1,10 +1,8 @@
 package edu.umich.imlc.mydesk.cloud.frontend.app.web;
 
-import com.google.gwt.core.shared.GWT;
 
 import edu.umich.imlc.mydesk.cloud.frontend.BasicPresenterClass;
 import edu.umich.imlc.mydesk.cloud.frontend.BasicView;
-import edu.umich.imlc.mydesk.cloud.frontend.app.drawables.DrawableObjectInjector;
 
 /**
  * Contains the current state of the application.

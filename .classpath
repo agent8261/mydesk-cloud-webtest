@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry excluding="edu/umich/imlc/mydesk/cloud/frontend/wesketch/web/" kind="src" path="src"/>
+	<classpathentry kind="src" path="Lienzo1_2"/>
 	<classpathentry excluding="edu/umich/imlc/mydesk/cloud/backend/|edu/umich/imlc/mydesk/cloud/shared/|edu/umich/imlc/mydesk/cloud/frontend/collabrify/|edu/umich/imlc/mydesk/cloud/frontend/history/|edu/umich/imlc/mydesk/cloud/frontend/portal/|edu/umich/imlc/mydesk/cloud/frontend/app/rpc/|edu/umich/imlc/mydesk/cloud/frontend/resources/|edu/umich/imlc/mydesk/cloud/frontend/ui/|edu/umich/imlc/mydesk/cloud/frontend/welcome/|edu/umich/imlc/mydesk/cloud/frontend/utilities/GenericCallback.java|edu/umich/imlc/mydesk/cloud/frontend/utilities/UserCellTable.java|edu/umich/imlc/mydesk/cloud/frontend/AppBusyEvent.java|edu/umich/imlc/mydesk/cloud/frontend/AppBusyEventHandler.java|edu/umich/imlc/mydesk/cloud/frontend/AppFreeEvent.java|edu/umich/imlc/mydesk/cloud/frontend/AppFreeEventHandler.java|edu/umich/imlc/mydesk/cloud/frontend/AsyncCallbackWithBusyIndicator.java|edu/umich/imlc/mydesk/cloud/frontend/BrowserEventType.java|edu/umich/imlc/mydesk/cloud/frontend/BusyPopup.java|edu/umich/imlc/mydesk/cloud/frontend/ClientFactory.java|edu/umich/imlc/mydesk/cloud/frontend/ClientFactoryInterface.java|edu/umich/imlc/mydesk/cloud/frontend/IsMembershipRequired.java|edu/umich/imlc/mydesk/cloud/frontend/LogoutButtonClickHandler.java|edu/umich/imlc/mydesk/cloud/frontend/MasterAppController.java|edu/umich/imlc/mydesk/cloud/frontend/MemberLoginPackage_GWT.java|edu/umich/imlc/mydesk/cloud/frontend/MyDeskAbstractActivity.java|edu/umich/imlc/mydesk/cloud/frontend/MyDeskAbstractPlace.java|edu/umich/imlc/mydesk/cloud/frontend/MyDeskActivityMapper.java|edu/umich/imlc/mydesk/cloud/frontend/MyDeskCloudEntryPoint.java|edu/umich/imlc/mydesk/cloud/frontend/MyDeskIconClickHandler.java|edu/umich/imlc/mydesk/cloud/frontend/MyDeskPlaceHistoryMapper.java|edu/umich/imlc/mydesk/cloud/frontend/OrganizationMemberType_GWT.java|edu/umich/imlc/mydesk/cloud/frontend/PlaceTokenCapable.java|edu/umich/imlc/mydesk/cloud/frontend/RunAsyncCallbackWithBusyIndicator.java|edu/umich/imlc/mydesk/cloud/frontend/SafeComparator.java|edu/umich/imlc/mydesk/cloud/frontend/ScrolledTabLayoutPanel.java|edu/umich/imlc/mydesk/cloud/frontend/UrlParameters.java|edu/umich/imlc/mydesk/cloud/frontend/BasicPresenter.java|edu/umich/imlc/mydesk/cloud/frontend/BasicPresenterClass.java|edu/umich/imlc/mydesk/cloud/frontend/app/wemap/web/WeMapPresenter.java|edu/umich/imlc/mydesk/cloud/frontend/app/wesketch/web/WeSketchPresenter.java|edu/umich/imlc/mydesk/cloud/frontend/app/wesketch/web/WeSketchViewInterface.java|edu/umich/imlc/mydesk/cloud/frontend/app/wemap/web/WeMapViewInterface.java|edu/umich/imlc/mydesk/cloud/frontend/rpc/|edu/umich/imlc/mydesk/cloud/frontend/app/wekwl/web/WeKWLPresenter.java" kind="src" path="MYDESK_CLOUD_SRC"/>
-	<classpathentry kind="src" path="PROTOCOL_BUFFER_UTILS"/>
-	<classpathentry kind="src" path="MYDESK_COMMON"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
-	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/lienzo-1.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/protobuf.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/objectify-4.0b1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/aopalliance.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gin-2.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/guice-3.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/guice-assistedinject-3.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/javax.inject.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-fileupload-1.3.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/objectify-4.0b1.jar"/>
+	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
+	<classpathentry kind="src" path="MYDESK_COMMON"/>
+	<classpathentry kind="src" path="PROTOCOL_BUFFER_UTILS"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/protobuf.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/aopalliance.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

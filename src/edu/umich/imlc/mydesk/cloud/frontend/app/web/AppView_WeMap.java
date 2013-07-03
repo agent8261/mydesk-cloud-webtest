@@ -1,16 +1,17 @@
 package edu.umich.imlc.mydesk.cloud.frontend.app.web;
 
+import com.emitrom.lienzo.client.core.event.NodeMouseUpEvent;
+import com.emitrom.lienzo.client.core.mediator.IMediator;
+import com.emitrom.lienzo.client.core.mediator.MousePanMediator;
+import com.emitrom.lienzo.client.core.mediator.MouseWheelZoomMediator;
 import com.emitrom.lienzo.client.core.shape.GridLayer;
 import com.emitrom.lienzo.client.core.shape.Line;
 import com.emitrom.lienzo.client.core.shape.Text;
-import com.emitrom.lienzo.client.widget.LienzoPanel;
+import com.emitrom.lienzo.client.core.shape.Viewport;
 import com.emitrom.lienzo.shared.core.types.ColorName;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.MouseDownEvent;
-import com.google.gwt.event.dom.client.MouseDownHandler;
-import com.google.gwt.event.dom.client.MouseUpEvent;
-import com.google.gwt.event.dom.client.MouseUpHandler;
+import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
@@ -19,33 +20,38 @@ import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 
 import edu.umich.imlc.mydesk.cloud.frontend.BasicView;
+import edu.umich.imlc.mydesk.cloud.frontend.app.drawables.CanvasPanel;
 import edu.umich.imlc.mydesk.cloud.frontend.app.drawables.LienzoLayer;
+import edu.umich.imlc.mydesk.cloud.frontend.app.drawables.LieznoAppView;
 import edu.umich.imlc.mydesk.cloud.frontend.app.obj.GWT_Oval;
 
+/**
+ * 
+ */
 public class AppView_WeMap extends ResizeComposite 
-  implements BasicView, MouseDownHandler, MouseUpHandler, ClickHandler, 
-  EditNodeDialog.OptionHandler
+  implements BasicView
 {
-  static final int CANVAS_WIDTH = 400;
-  static final int CANVAS_HEIGHT = 400;
+  static final int CANVAS_WIDTH = 410;
+  static final int CANVAS_HEIGHT = 410;
   
   static final int WORLD_WIDTH = 4000;
   static final int WORLD_HEIGHT = 4000;
-  static final int MIN_NODE_WIDTH = 50;
-  static final int MIN_NODE_HEIGHT = 30;
+  
+  static final int LINE_WIDTH = 3;
   
   static final String MODE_SELECT_GROUP = "Mode Selection";
   
   SimpleLayoutPanel corePanel = new SimpleLayoutPanel();
   FlowPanel contentPanel = new FlowPanel();
-  FlowPanel canvasPanel = new FlowPanel();
+  FlowPanel canvasDiv = new FlowPanel();
   HorizontalPanel modeSelectionPanel = new HorizontalPanel();  
-  LienzoPanel canvas;
+  CanvasPanel canvas;
   
   InlineLabel ilblMode = new InlineLabel("Mode: ");
   RadioButton rbAdd = new RadioButton(MODE_SELECT_GROUP, "Add");
   RadioButton rbDelete = new RadioButton(MODE_SELECT_GROUP, "Delete");
   RadioButton rbMove = new RadioButton(MODE_SELECT_GROUP, "Move");
+  RadioButton rbSelect = new RadioButton(MODE_SELECT_GROUP, "Select");
   
   Text text = null;
   Line line1 = null;
@@ -53,12 +59,17 @@ public class AppView_WeMap extends ResizeComposite
   GridLayer gridLayer = null;
   LienzoLayer baseLayer = null;
   
-  ModeType_e modeType = ModeType_e.ADD;
+  ModeType_e modeType = ModeType_e.NONE;
   EditNodeDialog nodeDialogBox = null;
   
+  LieznoAppView appView = LieznoAppView.getInstance();
   int centerX = 0, centerY = 0;
   GWT_Oval node;
   GWT_Oval ulNode, uRNode;
+  
+  LienzoMediator mediator = null;
+  EditorOptionHandler editOptionHandler = new EditorOptionHandler();
+  RadioBtnClickHandler radioBtnHandler = new RadioBtnClickHandler();
   
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
@@ -66,14 +77,15 @@ public class AppView_WeMap extends ResizeComposite
   public AppView_WeMap()
   {
     initModeSelectionPanel();
-    canvasPanel.setWidth(Integer.toString(CANVAS_WIDTH) + "px");
-    canvasPanel.setHeight(Integer.toString(CANVAS_HEIGHT) + "px");
-    canvas = new LienzoPanel(CANVAS_WIDTH, CANVAS_HEIGHT);
-    canvasPanel.add(canvas);
-    contentPanel.add(canvasPanel);
+    canvasDiv.setWidth(Integer.toString(CANVAS_WIDTH) + "px");
+    canvasDiv.setHeight(Integer.toString(CANVAS_HEIGHT) + "px");
+    canvas = new CanvasPanel(CANVAS_WIDTH, CANVAS_HEIGHT);
+    mediator = new LienzoMediator();
+    
+    canvasDiv.add(canvas);
+    contentPanel.add(canvasDiv);
     corePanel.add(contentPanel);
     
-    canvas.addMouseUpHandler(this);
     initWidget(corePanel);    
     doInitDraw();
   }
@@ -86,11 +98,16 @@ public class AppView_WeMap extends ResizeComposite
     modeSelectionPanel.add(rbAdd);
     modeSelectionPanel.add(rbDelete);
     modeSelectionPanel.add(rbMove);
+    modeSelectionPanel.add(rbSelect);
     
-    rbAdd.setValue(true);
+    rbAdd.addClickHandler(radioBtnHandler);
+    rbDelete.addClickHandler(radioBtnHandler);
+    rbMove.addClickHandler(radioBtnHandler);
+    rbSelect.addClickHandler(radioBtnHandler);
+    
+    modeType = ModeType_e.MOVE;
+    rbMove.setValue(true);
     rbDelete.setEnabled(false);
-    rbMove.setEnabled(false);
-    
     contentPanel.add(modeSelectionPanel);    
   }
   
@@ -98,78 +115,23 @@ public class AppView_WeMap extends ResizeComposite
   
   public void doInitDraw()
   {
-    line1 = new Line(0, 0, 0, 0).setStrokeColor(ColorName.BLUE);  // primary line
-    line2 = new Line(0, 0, 0, 0).setStrokeColor(ColorName.GREEN); // secondary line
-    line2.setDashArray(2, 2); // the secondary lines are dashed lines
-    gridLayer = new GridLayer(200, line1, 50, line2);
-    canvas.setBackgroundLayer(gridLayer);
-    
     baseLayer = new LienzoLayer();
     canvas.add(baseLayer);
+    canvas.getViewport().viewGlobalArea(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+    
+    line1 = new Line(0, 0, 0, 0)
+      .setStrokeColor(ColorName.BLUE).setStrokeWidth(LINE_WIDTH);
+    line2 = new Line(0, 0, 0, 0)
+      .setStrokeColor(ColorName.GREEN).setStrokeWidth(LINE_WIDTH);
+    line2.setDashArray(2, 2); // the secondary lines are dashed lines
+    gridLayer = new GridLayer(2000, line1, 500, line2);
+    canvas.setBackgroundLayer(gridLayer);
+    
     ulNode = new GWT_Oval(100, 100, null, null, "#000000", baseLayer);
     uRNode  = new GWT_Oval(400, 400, null, null, "#f8b40d", baseLayer);
-    canvas.getViewport().viewGlobalArea(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    
     //canvas.getViewport().viewLocalArea(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     baseLayer.draw();
-  }
-  
-  // ---------------------------------------------------------------------------
-  
-  @Override
-  public void onMouseUp(MouseUpEvent event)
-  {
-    switch(modeType)
-    {
-      case ADD: showNodeDialogBox(event.getX(), event.getY()); break;
-      case DELETE: break;
-      case MOVE: break;
-      case NONE: break;
-      default: break;
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  
-  @Override
-  public void onMouseDown(MouseDownEvent event)
-  {
-    switch(modeType)
-    {
-      case ADD: break;
-      case DELETE: break;
-      case MOVE: break;
-      case NONE: break;
-      default: break;
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  
-  @Override
-  public void onClick(ClickEvent event)
-  {
-    Object src = event.getSource();
-    if(src == rbAdd)
-    {
-      modeType = ModeType_e.ADD;
-    }
-  }
-  
-  // ---------------------------------------------------------------------------
-  
-  @Override
-  public void onConfirm(String title, String note, String color)
-  { 
-    createNewNode(title, note, color);
-    nodeDialogBox.hide();
-  }
-    
-  // ---------------------------------------------------------------------------
-  
-  @Override
-  public void onCancel()
-  {
-    nodeDialogBox.hide();
   }
   
   // ---------------------------------------------------------------------------
@@ -177,7 +139,7 @@ public class AppView_WeMap extends ResizeComposite
   void showNodeDialogBox(int x, int y)
   {
     if(nodeDialogBox == null)
-      nodeDialogBox = new EditNodeDialog(this);
+      nodeDialogBox = new EditNodeDialog(editOptionHandler);
     
     centerX = x;
     centerY = y;
@@ -192,13 +154,144 @@ public class AppView_WeMap extends ResizeComposite
     baseLayer.draw();
   }
   
-  // ---------------------------------------------------------------------------
-  // ---------------------------------------------------------------------------
+  // ===========================================================================
+  // ===========================================================================
   
   static enum ModeType_e
   {
     NONE, ADD, MOVE, DELETE;
   }
+
+  // ===========================================================================
+  // ===========================================================================
+  
+  class RadioBtnClickHandler implements ClickHandler
+  {
+    @Override
+    public void onClick(ClickEvent event)
+    {
+      Object src = event.getSource();
+      if(src == rbAdd)
+      {
+        modeType = ModeType_e.ADD;
+        canvas.setEnableDragging(false);
+        //mediator.panHndlr.setEnabled(false);
+        //mediator.zoomHndlr.setEnabled(false);
+        System.out.println("Dragging Disabled");
+      }
+      else if(src == rbMove)
+      {
+        modeType = ModeType_e.MOVE;
+        canvas.setEnableDragging(true);
+        //mediator.panHndlr.setEnabled(true);
+        //mediator.zoomHndlr.setEnabled(true);
+      }
+    }
+  }
+  
+  // ===========================================================================
+  // ===========================================================================
+  
+  class EditorOptionHandler implements EditNodeDialog.OptionHandler
+  {
+    @Override
+    public void onConfirm(String title, String note, String color)
+    {
+      createNewNode(title, note, color);
+      nodeDialogBox.hide();
+    }
+
+    @Override
+    public void onCancel()
+    {
+      nodeDialogBox.hide();
+    }
+  }
+  
+  // ===========================================================================
+  // ===========================================================================
+  
+  class LienzoMediator implements IMediator
+  {
+    String name;
+    boolean enabled = true;
+    
+    MouseWheelZoomMediator zoomHndlr = new MouseWheelZoomMediator();
+    MousePanMediator panHndlr = new MousePanMediator();
+    
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+    
+    private LienzoMediator()
+    {
+      Viewport vp = canvas.getViewport();
+      panHndlr.setViewport(vp);
+      zoomHndlr.setViewport(vp);
+      canvas.pushMediator(this);
+    }
+    
+    // ---------------------------------------------------------------------------
+    
+    @Override
+    public boolean handleEvent(GwtEvent<?> event)
+    {
+      switch(modeType)
+      {
+        case ADD:
+          if(event instanceof NodeMouseUpEvent)
+          {
+            NodeMouseUpEvent e = (NodeMouseUpEvent) event;
+            showNodeDialogBox(e.getX(), e.getY());
+            return true;
+          }
+          break;
+        case MOVE:
+        {
+          if(panHndlr.handleEvent(event))
+            return true;
+          else if(zoomHndlr.handleEvent(event))
+            return true;
+          break;
+        }
+        case DELETE: case NONE: default: 
+          break;
+      }    
+      return false;
+    }
+
+    // ---------------------------------------------------------------------------
+    
+    public void cancel()
+    {}
+
+    // ---------------------------------------------------------------------------
+    
+    public boolean isEnabled()
+    {
+      return enabled;
+    }
+
+    // ---------------------------------------------------------------------------
+    
+    public void setEnabled(boolean enabled)
+    {
+      this.enabled = enabled;
+    }
+
+    // ---------------------------------------------------------------------------
+    
+    public String getName()
+    {
+      return name;
+    }
+
+    // ---------------------------------------------------------------------------
+    
+    public void setName(String name)
+    {
+      this.name = name;
+    }
+  } // LienzoMediator
 
   // ---------------------------------------------------------------------------
 }

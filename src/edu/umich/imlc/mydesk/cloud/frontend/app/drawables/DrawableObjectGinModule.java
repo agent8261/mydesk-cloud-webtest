@@ -7,7 +7,7 @@ import com.google.gwt.inject.client.AbstractGinModule;
 
 /*
  * Used in dependency injection. 
- * Binds the interface for DrawableObjectFactory to it's implementation   
+ * Binds an interface to some implementation   
  */
 public class DrawableObjectGinModule extends AbstractGinModule
 {

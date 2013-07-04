@@ -9,6 +9,7 @@ import com.emitrom.lienzo.client.core.shape.Line;
 import com.emitrom.lienzo.client.core.shape.Text;
 import com.emitrom.lienzo.client.core.shape.Viewport;
 import com.emitrom.lienzo.shared.core.types.ColorName;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.GwtEvent;
@@ -70,6 +71,7 @@ public class AppView_WeMap extends ResizeComposite
   LienzoMediator mediator = null;
   EditorOptionHandler editOptionHandler = new EditorOptionHandler();
   RadioBtnClickHandler radioBtnHandler = new RadioBtnClickHandler();
+  GWTJSOTest.FlexiType ftype = null;
   
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
@@ -88,8 +90,30 @@ public class AppView_WeMap extends ResizeComposite
     
     initWidget(corePanel);    
     doInitDraw();
+    ftype = GWTJSOTest.makeFlexiJSO();
+    System.out.println("type: " + ftype.getType());
+    System.out.println("Hue: " + ftype.getHueOffset());
+    ftype.addCallback(new TCb());
+    ftype.doCallback();
+    
   }
+  // ---------------------------------------------------------------------------
+  
+  class TCb implements Callback<String, String>
+  {
+    @Override
+    public void onFailure(String reason)
+    {
+      System.out.println("Failed");
+    }
 
+    @Override
+    public void onSuccess(String result)
+    {
+      System.out.println("Result: " + result);
+    }
+  }
+  
   // ---------------------------------------------------------------------------
   
   void initModeSelectionPanel()
@@ -175,16 +199,12 @@ public class AppView_WeMap extends ResizeComposite
       {
         modeType = ModeType_e.ADD;
         canvas.setEnableDragging(false);
-        //mediator.panHndlr.setEnabled(false);
-        //mediator.zoomHndlr.setEnabled(false);
         System.out.println("Dragging Disabled");
       }
       else if(src == rbMove)
       {
         modeType = ModeType_e.MOVE;
         canvas.setEnableDragging(true);
-        //mediator.panHndlr.setEnabled(true);
-        //mediator.zoomHndlr.setEnabled(true);
       }
     }
   }

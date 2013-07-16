@@ -1,0 +1,12 @@
+
+/* Style for WeMap */
+
+.node-dialog-selected-color {
+	/*display: inline;*/
+	width: 50px;
+	height: 50px;
+	margin: 2px;
+  padding: 0px;
+  outline-style: none;
+  border: 1px solid black;
+}

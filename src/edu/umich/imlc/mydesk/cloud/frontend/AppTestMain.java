@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import edu.umich.imlc.mydesk.cloud.frontend.app.canvas.AppStyle;
 import edu.umich.imlc.mydesk.cloud.frontend.app.canvas.DataCache;
 import edu.umich.imlc.mydesk.cloud.frontend.app.web.AppView_WeMap;
+import edu.umich.imlc.mydesk.cloud.frontend.flexi.CPicker;
 
 public class AppTestMain implements EntryPoint, ResizeHandler
 {
@@ -48,12 +49,14 @@ public class AppTestMain implements EntryPoint, ResizeHandler
   int windowHeight = 0;
   
   AppView_WeMap appMap = null;
+  
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
   
   @Override
   public void onModuleLoad()
-  {    
+  {
+    
     AppStyle css = DataCache.IMPL.canvasStyle();
     corePanel.setStyleName(css.ctrlMain());
     corePanel.addStyleName(css.outlineOn());
@@ -67,18 +70,23 @@ public class AppTestMain implements EntryPoint, ResizeHandler
 
     westPanel.setStyleName(css.ctrlWest());
     westPanel.addStyleName(css.outlineOff());
-
+    
     //btnLoadFile.addClickHandler(new SwitchTestHandler());
     typeSelectionPanel.add(typeBox);
     typeSelectionPanel.add(btnLoadFile);
     
     westPanel.add(typeLabel);        
-    westPanel.add(typeSelectionPanel);    
-    corePanel.addWest(westPanel, 300);
+    westPanel.add(typeSelectionPanel);
     
-    appMap = new AppView_WeMap();
-    corePanel.add(appMap);
-
+    
+    corePanel.addWest(westPanel, 300);
+    // appMap = new AppView_WeMap();
+    // corePanel.add(appMap);
+    CPicker cp = new CPicker();
+    corePanel.add(cp);
+    //CpPanel cpPanel = new CpPanel();
+    //corePanel.add(cpPanel);
+    
     /*
     ctrl = new AppTestControl();        
     // doBasicTest();

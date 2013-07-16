@@ -9,7 +9,7 @@ import com.emitrom.lienzo.client.core.shape.Line;
 import com.emitrom.lienzo.client.core.shape.Text;
 import com.emitrom.lienzo.client.core.shape.Viewport;
 import com.emitrom.lienzo.shared.core.types.ColorName;
-import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.GwtEvent;
@@ -32,21 +32,18 @@ import edu.umich.imlc.mydesk.cloud.frontend.app.obj.GWT_Oval;
 public class AppView_WeMap extends ResizeComposite 
   implements BasicView
 {
-  static final int CANVAS_WIDTH = 410;
-  static final int CANVAS_HEIGHT = 410;
-  
+  static final int CANVAS_WIDTH = 400;
+  static final int CANVAS_HEIGHT = 400;
   static final int WORLD_WIDTH = 4000;
   static final int WORLD_HEIGHT = 4000;
-  
   static final int LINE_WIDTH = 3;
-  
   static final String MODE_SELECT_GROUP = "Mode Selection";
   
   SimpleLayoutPanel corePanel = new SimpleLayoutPanel();
   FlowPanel contentPanel = new FlowPanel();
   FlowPanel canvasDiv = new FlowPanel();
   HorizontalPanel modeSelectionPanel = new HorizontalPanel();  
-  CanvasPanel canvas;
+  CanvasPanel canvas = null;
   
   InlineLabel ilblMode = new InlineLabel("Mode: ");
   RadioButton rbAdd = new RadioButton(MODE_SELECT_GROUP, "Add");
@@ -71,47 +68,24 @@ public class AppView_WeMap extends ResizeComposite
   LienzoMediator mediator = null;
   EditorOptionHandler editOptionHandler = new EditorOptionHandler();
   RadioBtnClickHandler radioBtnHandler = new RadioBtnClickHandler();
-  GWTJSOTest.FlexiType ftype = null;
   
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
   
   public AppView_WeMap()
   {
-    initModeSelectionPanel();
     canvasDiv.setWidth(Integer.toString(CANVAS_WIDTH) + "px");
     canvasDiv.setHeight(Integer.toString(CANVAS_HEIGHT) + "px");
     canvas = new CanvasPanel(CANVAS_WIDTH, CANVAS_HEIGHT);
-    mediator = new LienzoMediator();
+    mediator = new LienzoMediator();    
+    initModeSelectionPanel();
     
     canvasDiv.add(canvas);
     contentPanel.add(canvasDiv);
     corePanel.add(contentPanel);
-    
+    corePanel.getElement().getStyle().setBackgroundColor("white");
     initWidget(corePanel);    
     doInitDraw();
-    ftype = GWTJSOTest.makeFlexiJSO();
-    System.out.println("type: " + ftype.getType());
-    System.out.println("Hue: " + ftype.getHueOffset());
-    ftype.addCallback(new TCb());
-    ftype.doCallback();
-    
-  }
-  // ---------------------------------------------------------------------------
-  
-  class TCb implements Callback<String, String>
-  {
-    @Override
-    public void onFailure(String reason)
-    {
-      System.out.println("Failed");
-    }
-
-    @Override
-    public void onSuccess(String result)
-    {
-      System.out.println("Result: " + result);
-    }
   }
   
   // ---------------------------------------------------------------------------
@@ -122,15 +96,14 @@ public class AppView_WeMap extends ResizeComposite
     modeSelectionPanel.add(rbAdd);
     modeSelectionPanel.add(rbDelete);
     modeSelectionPanel.add(rbMove);
-    modeSelectionPanel.add(rbSelect);
     
     rbAdd.addClickHandler(radioBtnHandler);
     rbDelete.addClickHandler(radioBtnHandler);
     rbMove.addClickHandler(radioBtnHandler);
-    rbSelect.addClickHandler(radioBtnHandler);
     
-    modeType = ModeType_e.MOVE;
-    rbMove.setValue(true);
+    setMode(ModeType_e.ADD);
+    rbAdd.setValue(true);
+    rbMove.setValue(false);
     rbDelete.setEnabled(false);
     contentPanel.add(modeSelectionPanel);    
   }
@@ -141,21 +114,27 @@ public class AppView_WeMap extends ResizeComposite
   {
     baseLayer = new LienzoLayer();
     canvas.add(baseLayer);
-    canvas.getViewport().viewGlobalArea(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+    //canvas.getViewport().viewGlobalArea(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     
     line1 = new Line(0, 0, 0, 0)
       .setStrokeColor(ColorName.BLUE).setStrokeWidth(LINE_WIDTH);
     line2 = new Line(0, 0, 0, 0)
       .setStrokeColor(ColorName.GREEN).setStrokeWidth(LINE_WIDTH);
     line2.setDashArray(2, 2); // the secondary lines are dashed lines
-    gridLayer = new GridLayer(2000, line1, 500, line2);
+    gridLayer = new GridLayer(200, line1, 50, line2);
     canvas.setBackgroundLayer(gridLayer);
     
-    ulNode = new GWT_Oval(100, 100, null, null, "#000000", baseLayer);
-    uRNode  = new GWT_Oval(400, 400, null, null, "#f8b40d", baseLayer);
-    
-    //canvas.getViewport().viewLocalArea(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    ulNode = new GWT_Oval(40, 40, null, null, "#000000", baseLayer);
+    uRNode  = new GWT_Oval(185, 174, "Foo", null, "#f8b40d", baseLayer);
     baseLayer.draw();
+    
+    Scheduler.get().scheduleDeferred( new Scheduler.ScheduledCommand()
+    {
+      @Override
+      public void execute()
+      { showNodeDialogBox(0, 0); }
+    });
+    
   }
   
   // ---------------------------------------------------------------------------
@@ -174,8 +153,31 @@ public class AppView_WeMap extends ResizeComposite
   
   void createNewNode(String title, String note, String color)
   {
-    node = new GWT_Oval(centerX, centerY, title, note, "#000000", baseLayer);
+    node = new GWT_Oval(centerX, centerY, title, note, color, baseLayer);
     baseLayer.draw();
+  }
+  
+  // ---------------------------------------------------------------------------
+  
+  void setMode(ModeType_e mode)
+  {
+    assert(canvas != null);
+    modeType = mode;
+    switch(mode)
+    {
+      case ADD: 
+        canvas.setEnableDragging(false);
+        if(!rbAdd.getValue())
+        { rbAdd.setValue(true); }
+        break;
+      case MOVE: 
+        canvas.setEnableDragging(true);
+        if(!rbMove.getValue())
+        { rbMove.setValue(true); }
+        break;
+      case DELETE: break;
+      default: break;
+    }
   }
   
   // ===========================================================================
@@ -197,14 +199,11 @@ public class AppView_WeMap extends ResizeComposite
       Object src = event.getSource();
       if(src == rbAdd)
       {
-        modeType = ModeType_e.ADD;
-        canvas.setEnableDragging(false);
-        System.out.println("Dragging Disabled");
+        setMode(ModeType_e.ADD);
       }
       else if(src == rbMove)
       {
-        modeType = ModeType_e.MOVE;
-        canvas.setEnableDragging(true);
+        setMode(ModeType_e.MOVE);
       }
     }
   }

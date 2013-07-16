@@ -181,7 +181,6 @@ final class CanvasHandlerManager
 
         if (m_mediators.handleEvent(nodeEvent))
         {
-          System.out.println("Mouse Up handled by mediator");
           return;
         }
         onNodeMouseUp(nodeEvent);
@@ -202,7 +201,6 @@ final class CanvasHandlerManager
         
         if(m_mediators.handleEvent(nodeEvent))
         {
-          System.out.println("Mouse Down handled by mediator");
           return;
         }
         fireDefaultEvent(nodeEvent);
@@ -483,7 +481,6 @@ final class CanvasHandlerManager
   {
     if(!enableDragging)
     {
-      System.out.println("Dragging Disabled");
       return;
     }
     IPrimitive<?> find = null;

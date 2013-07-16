@@ -32,7 +32,6 @@ public class LieznoAppView
   @Override
   public void onNodeDragStart(NodeDragStartEvent event)
   {
-    System.out.println("Start Drag");
     is_Dragging = true;
   }
 
@@ -41,7 +40,6 @@ public class LieznoAppView
   @Override
   public void onNodeDragEnd(NodeDragEndEvent event)
   {
-    System.out.println("End Drag");
     is_Dragging = false;
   }
   

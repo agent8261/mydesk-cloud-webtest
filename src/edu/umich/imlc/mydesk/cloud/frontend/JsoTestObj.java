@@ -1,30 +1,11 @@
-package edu.umich.imlc.mydesk.cloud.frontend.app.web;
+package edu.umich.imlc.mydesk.cloud.frontend;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 
-/**
- * GWT implementation of David Durman's FlexiColorPicker
- * https://github.com/DavidDurman/FlexiColorPicker
- * 
- * MIT License
- */
-public class GWTJSOTest extends JavaScriptObject
+
+public class JsoTestObj extends JavaScriptObject
 {
-  // ---------------------------------------------------------------------------
-  
-  static 
-  { 
-    initFlexiGlobals();
-    initSlidePickerMarkup();
-  }
-  
-  // ---------------------------------------------------------------------------
-  
-  protected GWTJSOTest() {}
-  
-  // ---------------------------------------------------------------------------
-  
   private static native void initFlexiGlobals() 
   /*-{
     $wnd.type = ($wnd.SVGAngle
@@ -226,70 +207,68 @@ public class GWTJSOTest extends JavaScriptObject
     };
   }-*/;
   
-  // ===========================================================================
-  // ===========================================================================
-  
-  public static class FlexiType extends JavaScriptObject
-  {
-    protected FlexiType(){}
-    
-    // -------------------------------------------------------------------------
-    public final native String getType()
-    /*-{
-      return this.type;
-    }-*/;
-    
-    // -------------------------------------------------------------------------
-    public final native String getSvgNS()
-    /*-{
-      return this.svgNS;
-    }-*/;
-    
-    // -------------------------------------------------------------------------
-    public final native int getHueOffset()
-    /*-{
-      return this.hueOffset;
-    }-*/;
-    
-    // -------------------------------------------------------------------------
-    public final native void doCallback()
-    /*-{
-      $wnd.pickfunc();
-    }-*/;
-    
-    // -------------------------------------------------------------------------
-    // a callback that has a string for either success or failure
-    public final native void addCallback(Callback<String, String> callback) 
-    /*-{
-      $wnd.pickfunc = function()
-      {
-        callback.@com.google.gwt.core.client.Callback::onSuccess(Ljava/lang/Object;)("success!");
-      };
-    }-*/;
-  }
-  
-  // ---------------------------------------------------------------------------  
-  // ---------------------------------------------------------------------------
-  
-  public static native String getType()
-  /*-{
-    return $wnd.type;
-  }-*/;
-  
-  // ---------------------------------------------------------------------------
-  
-  public static native int getHueOffset()
-  /*-{
-    return $wnd.hueOffset;
-  }-*/;
-  
-
-
-  // ---------------------------------------------------------------------------
-  
-  public static native void XXXX()
-  /*-{
+//===========================================================================
+ // ===========================================================================
+ 
+ public static class FlexiType extends JavaScriptObject
+ {
+   protected FlexiType(){}
+   
+   // -------------------------------------------------------------------------
+   public final native String getType()
+   /*-{
+     return this.type;
    }-*/;
-  
-  // ---------------------------------------------------------------------------
+   
+   // -------------------------------------------------------------------------
+   public final native String getSvgNS()
+   /*-{
+     return this.svgNS;
+   }-*/;
+   
+   // -------------------------------------------------------------------------
+   public final native int getHueOffset()
+   /*-{
+     return this.hueOffset;
+   }-*/;
+   
+   // -------------------------------------------------------------------------
+   public final native void doCallback()
+   /*-{
+     $wnd.pickfunc();
+   }-*/;
+   
+   // -------------------------------------------------------------------------
+   // a callback that has a string for either success or failure
+   public final native void addCallback(Callback<String, String> callback) 
+   /*-{
+     $wnd.pickfunc = function()
+     {
+       callback.@com.google.gwt.core.client.Callback::onSuccess(Ljava/lang/Object;)("success!");
+     };
+   }-*/;
+ }
+ 
+ // ---------------------------------------------------------------------------  
+ // ---------------------------------------------------------------------------
+ 
+ public static native String getType()
+ /*-{
+   return $wnd.type;
+ }-*/;
+ 
+ // ---------------------------------------------------------------------------
+ 
+ public static native int getHueOffset()
+ /*-{
+   return $wnd.hueOffset;
+ }-*/;
+ 
+ // ---------------------------------------------------------------------------
+ 
+ public static native void XXXX()
+ /*-{
+  }-*/;
+ 
+ // ---------------------------------------------------------------------------
 }

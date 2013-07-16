@@ -19,16 +19,17 @@ public class LienzoOvalNode implements DrawableObject
   static final DrawableObjectInjector appInjector = GWT.create(DrawableObjectInjector.class);
   
   static final String DEFAULT_COLOR = "black";
-  static final double DEFAULT_NODE_WIDTH = 500;
-  static final double DEFAULT_NODE_HEIGHT = 300;
-  static final double TEXT_BOX_PADDING = 5.0;
+  static final double DEFAULT_NODE_WIDTH = 50;
+  static final double DEFAULT_NODE_HEIGHT = 30;
+  static final double TEXT_BOX_PADDING_W = 4.0;
+  static final double TEXT_BOX_PADDING_H = 6.0;
   static final int MAX_TITLE_SIZE = 40;
-  static final double LINE_WIDTH = 10;
+  static final double LINE_WIDTH = 3;
   
   static final String DEFAULT_FONT = "Helvetica";
-  static final double DEFAULT_FONT_SIZE = 35;
+  //static final double DEFAULT_FONT_SIZE = 35;
+  static final double DEFAULT_FONT_SIZE = 12;
   
-  //LieznoAppView appView = LieznoAppView.getInstance();
   Group groupShape = null;
   Ellipse ellipseShape = null;
   Text titleShape = null;
@@ -43,7 +44,6 @@ public class LienzoOvalNode implements DrawableObject
     (double x, double y, String color, String title, DrawingSurface drawingSurface)
   {
     assert(drawingSurface instanceof Layer);
-    //System.out.println("Oval Location - x: " + x + " y: " + y);
     this.title = title;
     groupShape = new Group();
     groupShape.setDraggable(true);
@@ -71,15 +71,16 @@ public class LienzoOvalNode implements DrawableObject
     {
       String displayedText = getDisplayText();
       titleShape.setText(displayedText);
-      
       TextMetrics tm = titleShape.measure(groupShape.getLayer().getContext());
-      double urX = (tm.getWidth() * 0.5) + TEXT_BOX_PADDING;
-      double urY = (tm.getHeight() * 0.5) + TEXT_BOX_PADDING;
-      size.w = urY + dist(centerX, centerY, urX, urY);
-      double a = size.w * 0.5, f = urX * 0.5;
-      size.h = Math.sqrt(a * a - f * f);
+      
+      double h = (tm.getHeight() * 0.5) + TEXT_BOX_PADDING_H;
+      double w = (tm.getWidth() * 0.5) + TEXT_BOX_PADDING_W;
+      double disA = dist(w, 0, w, h);
+      double disB = dist(-1 * w, 0, w, h);
+      size.w = disA + disB;
+      double a = size.w * 0.5;
+      size.h = 2 * Math.sqrt(Math.abs(a * a - w * w));
     }    
-    //System.out.println("Oval Node Size w: " + size.w + " h: " + size.h);
     return size;
   }
   
@@ -97,8 +98,8 @@ public class LienzoOvalNode implements DrawableObject
   
   static double dist(double p1x, double p1y, double p2x, double p2y)
   {
-    double dx = p2x -p1x, dy = p2y - p1y;
-    return Math.sqrt(dx * dx + dy * dy);
+    double dx = p2x - p1x, dy = p2y - p1y;
+    return Math.sqrt( Math.abs((dx * dx) + (dy * dy)) );
   }
   
   // ---------------------------------------------------------------------------

@@ -1,0 +1,74 @@
+
+/* Style for the Color Picker */
+
+.divSatVal {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  padding: 0px;
+}
+
+.divHue {
+  position: absolute;
+  top: 4px;
+  left: 220px;
+  padding: 0px;
+}
+
+.divButtons {
+  padding: 0px;
+  position: absolute;
+  top: 220px;
+  left: 220px;
+}
+
+.divHueSel {
+  position: absolute;
+  top: 4px;
+  left: 280px;
+  width: 30px;
+  height: 40px;
+  background-color: green;
+}
+
+.divSatSel {
+  position: absolute;
+  top: 220px;
+  left: 4px;
+  width: 200px;
+  height: 40px;
+  background-color: red;
+}
+
+.cpRoot {
+  position: relative;
+  top: 0px;
+  left: 0px;
+  min-width: 300px;  
+  min-height: 265px;
+  max-width: 350px;
+  max-height: 300px;
+}
+
+.cpCanvasSatval {
+	margin: 0px;
+  background-color: white;
+}
+
+.cpCanvasHue {
+	margin: 0px;
+  background-color: white;
+}
+
+.cpLabel {
+  max-width: 100px; 
+}
+
+.outlineOn {
+  border: 1px solid black;
+}
+
+.outlineOff {
+  border: 0px none black;
+}
+ 

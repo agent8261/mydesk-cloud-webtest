@@ -5,11 +5,12 @@ import edu.umich.imlc.mydesk.cloud.frontend.app.drawables.DrawableObject.Drawing
 
 public class GWT_Oval extends GWT_Node
 {
-  public GWT_Oval(double x, double y, String title, 
+  public GWT_Oval(String objID, double x, double y, String title, 
       String note, String color, DrawingSurface surface)
   {
     super(title, note);
-    DrawableObject obj = factory.createOvalNode(x, y, color, title, surface);
+    DrawableObject obj = factory.createOvalNode(x, y, color, title, objID, surface);
     setDrawnObject(obj);
   }
+
 }

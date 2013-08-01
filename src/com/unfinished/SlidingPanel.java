@@ -26,8 +26,8 @@ public class SlidingPanel extends Composite
   
   public SlidingPanel()
   {
-    wLink = new Image(DataCache.IMPL.invertedlink());
-    iLink = new Image(DataCache.IMPL.waterlink());
+    //wLink = new Image(DataCache.IMPL.invertedlink());
+    //iLink = new Image(DataCache.IMPL.waterlink());
     Element e = panel.getElement();
     e.getStyle().setWidth(PANEL_WIDTH, Unit.PX);
     e.getStyle().setHeight(PANEL_HEIGHT, Unit.PX);

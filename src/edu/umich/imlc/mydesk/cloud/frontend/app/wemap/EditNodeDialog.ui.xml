@@ -1,0 +1,65 @@
+<!-- *************************************************************************-->
+<!-- *************************************************************************-->
+
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder
+  xmlns:ui="urn:ui:com.google.gwt.uibinder"
+  xmlns:g="urn:import:com.google.gwt.user.client.ui"
+  xmlns:cp="urn:import:edu.umich.imlc.mydesk.cloud.frontend.app.wemap">
+
+<ui:style field="css" src="res/cp_style.css"/>
+<ui:style>
+.divSelectedColor{
+  height: 10px;
+}
+</ui:style>
+
+<!-- *************************************************************************-->
+
+<g:HTMLPanel>
+<g:DialogBox ui:field="dialogBox" autoHide="true" modal="true">
+
+  <g:caption>
+    <div ui:field="divCaption">Dialog Box Title</div>
+  </g:caption>
+
+  <g:HTMLPanel>
+    <div ui:field="divDialogBody">
+
+      <div ui:field="divNodeTitle">
+        <span>Title:</span>
+        <g:TextBox ui:field="tboxTitle"/>
+      </div>
+
+      <div ui:field="divNodeNote">
+        <span>Note:</span>
+        <g:TextBox ui:field="tboxNote"/>
+      </div>
+
+      <div ui:field="divCurrentColor" class="{style.divSelectedColor}"/>
+
+      <div ui:field="divColorPicker">
+        <g:DisclosurePanel ui:field="cpPanel">
+          <g:customHeader>
+            <g:Label ui:field="lblDisclosurePnl">Select New Color</g:Label>
+          </g:customHeader>
+
+           <g:HTMLPanel>
+             <div ui:field="divDisclosureBody">
+              <cp:CPicker ui:field="cPicker"/>
+             </div>
+           </g:HTMLPanel>
+        </g:DisclosurePanel>
+      </div>
+
+      <div ui:field="divDialogControl">
+        <g:Button ui:field="btnConfirm">Ok</g:Button>
+        <g:Button ui:field="btnCancel">Cancel</g:Button>
+      </div>
+
+      </div>
+  </g:HTMLPanel>
+</g:DialogBox>
+</g:HTMLPanel>
+
+</ui:UiBinder>

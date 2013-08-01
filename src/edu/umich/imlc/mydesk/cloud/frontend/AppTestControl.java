@@ -6,7 +6,7 @@ import edu.umich.imlc.mydesk.cloud.frontend.BasicView;
 import edu.umich.imlc.mydesk.cloud.frontend.app.canvas.AppStyle;
 import edu.umich.imlc.mydesk.cloud.frontend.app.canvas.DataCache;
 import edu.umich.imlc.mydesk.cloud.frontend.app.wekwl.WeKWLFile_GWT;
-import edu.umich.imlc.mydesk.cloud.frontend.app.wekwl.web.WeKWLView;
+import edu.umich.imlc.mydesk.cloud.frontend.app.wemap.App_WeMap;
 import edu.umich.imlc.mydesk.cloud.frontend.app.wemap.WeMapFile_GWT;
 import edu.umich.imlc.mydesk.cloud.frontend.app.wemap.web.WeMapView;
 import edu.umich.imlc.mydesk.cloud.frontend.app.wesketch.WeSketchFile_GWT;
@@ -22,8 +22,9 @@ public class AppTestControl extends BasicPresenterClass
   
   WeMapView mapView = null;
   WeSketchView skView = null;
-  WeKWLView kwlView = null;
-    
+  
+  App_WeMap ctrlWeMap = null;
+  
   FlowView corePanel = new FlowView();
   
   // ---------------------------------------------------------------------------
@@ -33,7 +34,7 @@ public class AppTestControl extends BasicPresenterClass
   {
     AppStyle css = DataCache.IMPL.canvasStyle();
     corePanel.setStyleName(css.outlineOff());
-    mapView = new WeMapView();
+    ctrlWeMap = new App_WeMap();
     switchToMap();
   }
 
@@ -48,10 +49,8 @@ public class AppTestControl extends BasicPresenterClass
   // ---------------------------------------------------------------------------
   
   public void doWeMapTest()
-  {    
-    assert(mapfile != null);
+  {
     switchToMap();
-    mapView.drawFile(mapfile);
   }
   
   // ---------------------------------------------------------------------------
@@ -69,11 +68,11 @@ public class AppTestControl extends BasicPresenterClass
   {
    if(kwlfile == null)
      kwlfile = WeKWLFile_GWT.makeDummyFile("KwlTestFile", "WeKWL", "kwlTestID", "format");
-   if(kwlView == null)
+   /*if(kwlView == null)
    {
      kwlView = new WeKWLView();
      kwlView.loadFile(kwlfile);
-   }
+   }*/
    switchToKwl();
   }
   
@@ -115,7 +114,7 @@ public class AppTestControl extends BasicPresenterClass
   void switchToMap()
   {
     corePanel.clear();
-    corePanel.add(mapView.asWidget());
+    ctrlWeMap.go(corePanel);
   }
   
   // ---------------------------------------------------------------------------
@@ -131,7 +130,7 @@ public class AppTestControl extends BasicPresenterClass
   void switchToKwl()
   {
     corePanel.clear();
-    corePanel.add(kwlView.asWidget());
+    //corePanel.add(kwlView.asWidget());
   }
   
   // ---------------------------------------------------------------------------

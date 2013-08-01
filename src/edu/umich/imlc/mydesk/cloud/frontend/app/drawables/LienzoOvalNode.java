@@ -10,13 +10,15 @@ import com.emitrom.lienzo.shared.core.types.TextAlign;
 import com.emitrom.lienzo.shared.core.types.TextBaseLine;
 import com.google.gwt.core.shared.GWT;
 
+import edu.umich.imlc.mydesk.cloud.frontend.AppGinInjector;
+
 
 /*
  * Width and height of the Oval is based on the size of the title
  */
 public class LienzoOvalNode implements DrawableObject
 {
-  static final DrawableObjectInjector appInjector = GWT.create(DrawableObjectInjector.class);
+  static final AppGinInjector appInjector = GWT.create(AppGinInjector.class);
   
   static final String DEFAULT_COLOR = "black";
   static final double DEFAULT_NODE_WIDTH = 50;
@@ -41,11 +43,15 @@ public class LienzoOvalNode implements DrawableObject
   // ---------------------------------------------------------------------------
   
   public LienzoOvalNode
-    (double x, double y, String color, String title, DrawingSurface drawingSurface)
+    (double x, double y, String color, String title, String objID, DrawingSurface drawingSurface)
   {
-    assert(drawingSurface instanceof Layer);
+    assert(drawingSurface instanceof LienzoLayer);
+    if(!(drawingSurface instanceof LienzoLayer) || (objID == null))
+      throw new IllegalArgumentException();
+    
     this.title = title;
     groupShape = new Group();
+    groupShape.setID(objID);
     groupShape.setDraggable(true);
     
     titleShape = new Text(" ", DEFAULT_FONT, DEFAULT_FONT_SIZE);
@@ -53,7 +59,9 @@ public class LienzoOvalNode implements DrawableObject
       .setTextAlign(TextAlign.CENTER).setTextBaseLine(TextBaseLine.MIDDLE);
     
     groupShape.add(titleShape);
-    Layer layer = (Layer)drawingSurface;
+    LienzoLayer layer = (LienzoLayer)drawingSurface;
+    groupShape.addNodeDragStartHandler(layer.getNodeDragStartHandler());
+    groupShape.addNodeDragEndHandler(layer.getNodeDragEndHandler());
     layer.add(groupShape);
     Size s = calcEllipseSize(x, y);
     ellipseShape = new Ellipse(s.w, s.h);
@@ -105,29 +113,6 @@ public class LienzoOvalNode implements DrawableObject
   // ---------------------------------------------------------------------------
   
   @Override
-  public void setPosition(double x, double y)
-  {
-  }
-
-  // ---------------------------------------------------------------------------
-  
-  @Override
-  public double getX()
-  {
-    return 0;
-  }
-
-  // ---------------------------------------------------------------------------
-  
-  @Override
-  public double getY()
-  {
-    return 0;
-  }
-
-  // ---------------------------------------------------------------------------
-  
-  @Override
   public void addTo(DrawingSurface drawingSurface)
   {
     if(drawingSurface instanceof Layer)
@@ -135,6 +120,35 @@ public class LienzoOvalNode implements DrawableObject
       Layer layer = (Layer)drawingSurface;
       layer.add(groupShape);
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  
+  @Override
+  public void removeFrom(DrawingSurface drawingSurface)
+  {
+    if(drawingSurface instanceof Layer)
+    {
+      Layer layer = (Layer)drawingSurface;
+      layer.remove(groupShape);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  
+  @Override
+  public String getObjectID()
+  {
+    return groupShape.getID();
+  }
+
+  // ---------------------------------------------------------------------------
+  
+  @Override
+  public void setPosition(double x, double y)
+  {
+    groupShape.setX(x);
+    groupShape.setY(y);
   }
 
   // ---------------------------------------------------------------------------

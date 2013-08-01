@@ -13,9 +13,9 @@ public class LienzoObjectFactory implements DrawableObjectFactory
   
   @Override
   public DrawableObject createOvalNode
-    (double x, double y, String color, String title, DrawingSurface drawingSurface)
+    (double x, double y, String color, String title, String objID, DrawingSurface drawingSurface)
   {
-    return new LienzoOvalNode(x, y, color, title, drawingSurface);
+    return new LienzoOvalNode(x, y, color, title, objID, drawingSurface);
   }
   
   // ---------------------------------------------------------------------------

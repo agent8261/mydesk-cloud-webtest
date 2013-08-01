@@ -1,22 +1,15 @@
 package edu.umich.imlc.mydesk.cloud.frontend.app.drawables;
 
 public interface DrawableObject
-{
-  // ---------------------------------------------------------------------------
+{ 
+  public void addTo(DrawingSurface drawingSurface);
+  
+  public void removeFrom(DrawingSurface drawingSurface);
+  
+  public String getObjectID();
   
   public void setPosition(double x, double y);
   
-  // ---------------------------------------------------------------------------
-  
-  public double getX();
-  
-  // ---------------------------------------------------------------------------
-  
-  public double getY();
-  
-  // ---------------------------------------------------------------------------
-  
-  public void addTo(DrawingSurface drawingSurface);
   
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
@@ -28,6 +21,7 @@ public interface DrawableObject
   public static interface DrawingSurface
   {
     void draw();
+    void remove(DrawableObject obj);
   }
   
   // ---------------------------------------------------------------------------

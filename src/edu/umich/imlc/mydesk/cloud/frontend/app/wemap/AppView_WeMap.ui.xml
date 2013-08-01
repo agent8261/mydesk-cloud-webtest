@@ -1,0 +1,31 @@
+<!-- *************************************************************************-->
+<!-- *************************************************************************-->
+
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder
+  xmlns:ui="urn:ui:com.google.gwt.uibinder"
+  xmlns:g="urn:import:com.google.gwt.user.client.ui"
+  xmlns:c='urn:import:edu.umich.imlc.mydesk.cloud.frontend.app.drawables'>
+  
+<ui:style field="css" src="res/cp_style.css"/>
+
+<!-- *************************************************************************-->
+
+<g:SimpleLayoutPanel ui:field="corePanel">
+ <g:FlowPanel>
+    <g:HorizontalPanel ui:field="modeSelectionPanel">
+      <g:InlineLabel ui:field="ilblMode" text="Mode: "/>
+      <g:RadioButton ui:field="rbAdd"/>
+      <g:RadioButton ui:field="rbDelete"/>
+      <g:RadioButton ui:field="rbMove"/>
+      <g:RadioButton ui:field="rbSelect"/>
+      <g:Button ui:field="btnUndo" text="Undo"/>
+      <g:Button ui:field="btnRedo" text="Redo"/>
+    </g:HorizontalPanel>
+    
+    <g:FlowPanel ui:field="canvasDiv">
+      <c:CanvasPanel ui:field="canvas"/>
+    </g:FlowPanel>
+</g:FlowPanel>
+</g:SimpleLayoutPanel>  
+</ui:UiBinder>

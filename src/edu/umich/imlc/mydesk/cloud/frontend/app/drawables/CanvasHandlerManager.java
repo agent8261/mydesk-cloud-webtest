@@ -139,220 +139,23 @@ final class CanvasHandlerManager
   
   private final void addHandlers()
   {
-    m_lienzo.addClickHandler(new ClickHandler()
-    {
-      @Override
-      public void onClick(ClickEvent event)
-      {
-        event.preventDefault();
-        onNodeMouseClick(new NodeMouseClickEvent(event));
-      }
-    });
-    m_lienzo.addDoubleClickHandler(new DoubleClickHandler()
-    {
-      @Override
-      public void onDoubleClick(DoubleClickEvent event)
-      {
-        onNodeMouseDoubleClick(new NodeMouseDoubleClickEvent(event));
-      }
-    });
-    m_lienzo.addMouseMoveHandler(new MouseMoveHandler()
-    {
-      @Override
-      public void onMouseMove(MouseMoveEvent event)
-      {
-        event.preventDefault();
-        NodeMouseMoveEvent nodeEvent = new NodeMouseMoveEvent(event);
-
-        if (m_mediators.handleEvent(nodeEvent))
-          return;
-        if ((m_dragging) && (m_dragging_using_touches))
-          return;
-        onNodeMouseMove(nodeEvent);
-      }
-    });
-    m_lienzo.addMouseUpHandler(new MouseUpHandler()
-    {
-      @Override
-      public void onMouseUp(MouseUpEvent event)
-      {
-        event.preventDefault();
-        NodeMouseUpEvent nodeEvent = new NodeMouseUpEvent(event);
-
-        if (m_mediators.handleEvent(nodeEvent))
-        {
-          return;
-        }
-        onNodeMouseUp(nodeEvent);
-      }
-    });
-    m_lienzo.addMouseDownHandler(new MouseDownHandler()
-    {
-      @Override
-      public void onMouseDown(MouseDownEvent event)
-      {
-        event.preventDefault();
-        NodeMouseDownEvent nodeEvent = new NodeMouseDownEvent(event);
-        
-        m_dragging_mouse_pressed = true;
-        doPrepareDragging(nodeEvent);
-        if(m_dragging)
-          return;
-        
-        if(m_mediators.handleEvent(nodeEvent))
-        {
-          return;
-        }
-        fireDefaultEvent(nodeEvent);
-      }
-    });
-    m_lienzo.addMouseOutHandler(new MouseOutHandler()
-    {
-      @Override
-      public void onMouseOut(MouseOutEvent event)
-      {
-        event.preventDefault();
-        NodeMouseOutEvent nodeEvent = new NodeMouseOutEvent(event);
-
-        if( m_mediators.handleEvent(nodeEvent) )
-          return;
-        onNodeMouseOut(nodeEvent);
-      }
-    });
-    m_lienzo.addMouseOverHandler(new MouseOverHandler()
-    {
-      @Override
-      public void onMouseOver(MouseOverEvent event)
-      {
-        event.preventDefault();
-        NodeMouseOverEvent nodeEvent = new NodeMouseOverEvent(event);
-
-        if( m_mediators.handleEvent(nodeEvent) )
-          return;
-        onNodeMouseOver(nodeEvent);
-      }
-    });
-    m_lienzo.addMouseWheelHandler(new MouseWheelHandler()
-    {
-      @Override
-      public void onMouseWheel(MouseWheelEvent event)
-      {
-        event.preventDefault();
-        NodeMouseWheelEvent nodeEvent = new NodeMouseWheelEvent(event);
-
-        if( false == m_mediators.handleEvent(nodeEvent) )
-        {
-          fireEvent(nodeEvent);
-        }
-        event.stopPropagation();
-      }
-    });
-    m_lienzo.addTouchCancelHandler(new TouchCancelHandler()
-    {
-      @Override
-      public void onTouchCancel(TouchCancelEvent event)
-      {
-        event.preventDefault();
-
-        NodeTouchCancelEvent nodeEvent = new NodeTouchCancelEvent(
-            getTouches(event));
-
-        if( m_mediators.handleEvent(event) )
-          return;
-        onNodeMouseOut(nodeEvent);
-      }
-    });
-    m_lienzo.addTouchEndHandler(new TouchEndHandler()
-    {
-      @Override
-      public void onTouchEnd(TouchEndEvent event)
-      {
-        event.preventDefault();
-
-        NodeTouchEndEvent nodeEvent = new NodeTouchEndEvent(m_touches);
-
-        if( m_mediators.handleEvent(nodeEvent) )
-          return;
-        onNodeMouseUp(nodeEvent);
-      }
-    });
-    m_lienzo.addTouchMoveHandler(new TouchMoveHandler()
-    {
-      @Override
-      public void onTouchMove(TouchMoveEvent event)
-      {
-        event.preventDefault();
-
-        m_touches = getTouches(event);
-
-        NodeTouchMoveEvent nodeEvent = new NodeTouchMoveEvent(m_touches);
-
-        if( m_mediators.handleEvent(nodeEvent) )
-          return;
-        onNodeMouseMove(nodeEvent);
-      }
-    });
-    m_lienzo.addTouchStartHandler(new TouchStartHandler()
-    {
-      @Override
-      public void onTouchStart(TouchStartEvent event)
-      {
-        event.preventDefault();
-
-        m_touches = getTouches(event);
-
-        NodeTouchStartEvent nodeEvent = new NodeTouchStartEvent(m_touches);
-
-        if( m_mediators.handleEvent(nodeEvent) )
-          return;
-        onNodeMouseDown(nodeEvent);
-      }
-    });
-    m_lienzo.addGestureStartHandler(new GestureStartHandler()
-    {
-      @Override
-      public void onGestureStart(GestureStartEvent event)
-      {
-        event.preventDefault();
-
-        NodeGestureStartEvent nodeEvent = new NodeGestureStartEvent(event
-            .getScale(), event.getRotation());
-
-        if( m_mediators.handleEvent(nodeEvent) )
-          return;
-        fireEvent(nodeEvent);
-      }
-    });
-    m_lienzo.addGestureEndHandler(new GestureEndHandler()
-    {
-      @Override
-      public void onGestureEnd(GestureEndEvent event)
-      {
-        event.preventDefault();
-
-        NodeGestureEndEvent nodeEvent = new NodeGestureEndEvent(event
-            .getScale(), event.getRotation());
-
-        if( m_mediators.handleEvent(nodeEvent) )
-          return;
-        fireEvent(nodeEvent);
-      }
-    });
-    m_lienzo.addGestureChangeHandler(new GestureChangeHandler()
-    {
-      @Override
-      public void onGestureChange(GestureChangeEvent event)
-      {
-        event.preventDefault();
-
-        NodeGestureChangeEvent nodeEvent = new NodeGestureChangeEvent(event
-            .getScale(), event.getRotation());
-
-        if( m_mediators.handleEvent(nodeEvent) )
-          return;
-        fireEvent(nodeEvent);
-      }
-    });
+    m_lienzo.addClickHandler(new L_ClickHandler());    
+    m_lienzo.addDoubleClickHandler(new L_DoubleClickHndlr());
+    m_lienzo.addMouseMoveHandler(new L_MouseMoveHndlr());
+    m_lienzo.addMouseUpHandler(new L_MouseUpHndlr());
+    m_lienzo.addMouseDownHandler(new L_MouseDownHndlr());
+    m_lienzo.addMouseOutHandler(new L_MouseOutHandler());
+    m_lienzo.addMouseOverHandler(new L_MouseOverHandler());
+    
+    m_lienzo.addMouseWheelHandler(new L_MouseWheelHandler());
+    m_lienzo.addTouchCancelHandler(new L_TouchCancelHndlr());
+    m_lienzo.addTouchEndHandler(new L_TouchEndHndlr());
+    m_lienzo.addTouchMoveHandler(new L_TouchMoveHandler());
+    
+    m_lienzo.addTouchStartHandler(new L_TouchStartHandler());
+    m_lienzo.addGestureStartHandler(new L_GestureStartHandler());
+    m_lienzo.addGestureEndHandler(new L_GestureEndHandler());
+    m_lienzo.addGestureChangeHandler(new L_GestureChangeHandler());
   }
 
   // ---------------------------------------------------------------------------
@@ -602,15 +405,12 @@ final class CanvasHandlerManager
       {
         doPrepareDragging(event);
         if( false == m_dragging )
-        {
-          m_dragging_mouse_pressed = false;
-        }
+        { m_dragging_mouse_pressed = false; }
       }
     }
     if( m_dragging )
     {
       doDragMove(event);
-
       return;
     }
     doCheckEnterExitShape(event);
@@ -637,7 +437,6 @@ final class CanvasHandlerManager
     {
       doDragCancel(event);
       m_dragging_ignore_clicks = true;
-
       return true;
     }
     IPrimitive<?> prim = findPrimitiveForEvent(event, event.getNodeEvent()
@@ -686,6 +485,256 @@ final class CanvasHandlerManager
   private final void fireEvent(GwtEvent<?> event)
   {
     m_lienzo.getViewport().fireEvent(event);
+  }
+  
+  // ---------------------------------------------------------------------------
+  //---------------------------------------------------------------------------
+  
+  class L_ClickHandler implements ClickHandler
+  {
+    @Override
+    public void onClick(ClickEvent event)
+    {
+      event.preventDefault();
+      onNodeMouseClick(new NodeMouseClickEvent(event));
+    }
+  }
+  
+  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  
+  class L_DoubleClickHndlr implements DoubleClickHandler
+  {
+    @Override
+    public void onDoubleClick(DoubleClickEvent event)
+    {
+      onNodeMouseDoubleClick(new NodeMouseDoubleClickEvent(event));
+    }
+  }
+  
+  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  
+  class L_MouseMoveHndlr implements MouseMoveHandler
+  {
+    @Override
+    public void onMouseMove(MouseMoveEvent event)
+    {
+      event.preventDefault();
+      NodeMouseMoveEvent nodeEvent = new NodeMouseMoveEvent(event);
+      if (m_mediators.handleEvent(nodeEvent))
+        return;
+      if ((m_dragging) && (m_dragging_using_touches))
+        return;
+      onNodeMouseMove(nodeEvent);
+    }
+  }
+  
+  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  
+  class L_MouseUpHndlr implements MouseUpHandler
+  {
+    @Override
+    public void onMouseUp(MouseUpEvent event)
+    {
+      event.preventDefault();
+      NodeMouseUpEvent nodeEvent = new NodeMouseUpEvent(event);
+
+      if (m_mediators.handleEvent(nodeEvent))
+      { return; }
+      onNodeMouseUp(nodeEvent);
+    }
+  }
+  
+  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  
+  class L_MouseDownHndlr implements MouseDownHandler
+  {
+    @Override
+    public void onMouseDown(MouseDownEvent event)
+    {
+      event.preventDefault();
+      NodeMouseDownEvent nodeEvent = new NodeMouseDownEvent(event);
+      
+      m_dragging_mouse_pressed = true;
+      doPrepareDragging(nodeEvent);
+      if(m_dragging)
+        return;
+      
+      if(m_mediators.handleEvent(nodeEvent))
+      { return; }
+      fireDefaultEvent(nodeEvent);
+    }
+  }
+  
+  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  
+  class L_MouseOutHandler implements MouseOutHandler
+  {
+    @Override
+    public void onMouseOut(MouseOutEvent event)
+    {
+      event.preventDefault();
+      NodeMouseOutEvent nodeEvent = new NodeMouseOutEvent(event);
+      if( m_mediators.handleEvent(nodeEvent) )
+        return;
+      onNodeMouseOut(nodeEvent);
+    }
+  }
+  
+  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  
+  class L_MouseOverHandler implements MouseOverHandler
+  {
+    @Override
+    public void onMouseOver(MouseOverEvent event)
+    {
+      event.preventDefault();
+      NodeMouseOverEvent nodeEvent = new NodeMouseOverEvent(event);
+      if( m_mediators.handleEvent(nodeEvent) )
+        return;
+      onNodeMouseOver(nodeEvent);
+    }
+  }
+  
+  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  
+  class L_MouseWheelHandler implements MouseWheelHandler
+  {
+    @Override
+    public void onMouseWheel(MouseWheelEvent event)
+    {
+      event.preventDefault();
+      NodeMouseWheelEvent nodeEvent = new NodeMouseWheelEvent(event);
+      if( false == m_mediators.handleEvent(nodeEvent) )
+      {
+        fireEvent(nodeEvent);
+      }
+      event.stopPropagation();
+    }
+  }
+  
+  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  
+  class L_TouchCancelHndlr implements TouchCancelHandler
+  {
+    @Override
+    public void onTouchCancel(TouchCancelEvent event)
+    {
+      event.preventDefault();
+      NodeTouchCancelEvent nodeEvent = new NodeTouchCancelEvent(
+          getTouches(event));
+      if( m_mediators.handleEvent(event) )
+        return;
+      onNodeMouseOut(nodeEvent);
+    }
+  }
+  
+  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  
+  class L_TouchEndHndlr implements TouchEndHandler
+  {
+    @Override
+    public void onTouchEnd(TouchEndEvent event)
+    {
+      event.preventDefault();
+      NodeTouchEndEvent nodeEvent = new NodeTouchEndEvent(m_touches);
+      if( m_mediators.handleEvent(nodeEvent) )
+        return;
+      onNodeMouseUp(nodeEvent);
+    }
+  }
+  
+  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  
+  class L_TouchMoveHandler implements TouchMoveHandler
+  {
+    @Override
+    public void onTouchMove(TouchMoveEvent event)
+    {
+      event.preventDefault();
+      m_touches = getTouches(event);
+      NodeTouchMoveEvent nodeEvent = new NodeTouchMoveEvent(m_touches);
+      if( m_mediators.handleEvent(nodeEvent) )
+        return;
+      onNodeMouseMove(nodeEvent);
+    }
+  }
+  
+  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  
+  class L_TouchStartHandler implements TouchStartHandler
+  {
+    @Override
+    public void onTouchStart(TouchStartEvent event)
+    {
+      event.preventDefault();
+      m_touches = getTouches(event);
+      NodeTouchStartEvent nodeEvent = new NodeTouchStartEvent(m_touches);
+      if( m_mediators.handleEvent(nodeEvent) )
+        return;
+      onNodeMouseDown(nodeEvent);
+    }
+  }
+  
+  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  
+  class L_GestureStartHandler implements GestureStartHandler
+  {
+    @Override
+    public void onGestureStart(GestureStartEvent event)
+    {
+      event.preventDefault();
+      NodeGestureStartEvent nodeEvent = new NodeGestureStartEvent(event
+          .getScale(), event.getRotation());
+      if( m_mediators.handleEvent(nodeEvent) )
+        return;
+      fireEvent(nodeEvent);
+    }
+  }
+  
+  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  
+  class L_GestureEndHandler implements GestureEndHandler
+  {
+    @Override
+    public void onGestureEnd(GestureEndEvent event)
+    {
+      event.preventDefault();
+      NodeGestureEndEvent nodeEvent = new NodeGestureEndEvent(event
+          .getScale(), event.getRotation());
+      if( m_mediators.handleEvent(nodeEvent) )
+        return;
+      fireEvent(nodeEvent);
+    }
+  }
+  
+  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  
+  class L_GestureChangeHandler implements GestureChangeHandler
+  {
+    @Override
+    public void onGestureChange(GestureChangeEvent event)
+    {
+      event.preventDefault();
+      NodeGestureChangeEvent nodeEvent = new NodeGestureChangeEvent(event
+          .getScale(), event.getRotation());
+      if( m_mediators.handleEvent(nodeEvent) )
+        return;
+      fireEvent(nodeEvent);
+    }
   }
   
   // ---------------------------------------------------------------------------

@@ -7,10 +7,31 @@
   xmlns:g="urn:import:com.google.gwt.user.client.ui"
   xmlns:cp="urn:import:edu.umich.imlc.mydesk.cloud.frontend.app.wemap">
 
-<ui:style field="css" src="res/cp_style.css"/>
 <ui:style>
-.divSelectedColor{
+.divCColor{
+  vertical-align: center;
+  margin:0px;
+  padding:0px;
+  border:0px none black;
+  outline:black none 0px;
+}
+
+.pnlCurrentColor{
   height: 10px;
+  width: 10px;
+}
+
+.divSelectedColor{
+  display: inline-block;
+  height: 18px;
+  width: 40px;
+}
+
+.spanCurrentColor{  
+}
+
+.tboxTitle{
+  color: red;
 }
 </ui:style>
 
@@ -28,22 +49,26 @@
 
       <div ui:field="divNodeTitle">
         <span>Title:</span>
-        <g:TextBox ui:field="tboxTitle"/>
+        <g:TextBox ui:field="tboxTitle" styleName="{style.tboxTitle}"/>
       </div>
 
       <div ui:field="divNodeNote">
         <span>Note:</span>
         <g:TextBox ui:field="tboxNote"/>
       </div>
-
-      <div ui:field="divCurrentColor" class="{style.divSelectedColor}"/>
-
+      
+      <div ui:field="divCColor" class="{style.divCColor}">
+        <table>
+          <tr>
+            <td class="style.spanCurrentColor">Current Color: </td>
+            <td><div ui:field="divCurrentColor" class="{style.divSelectedColor}"/></td>
+          </tr>
+        </table>
+      </div>
+      
       <div ui:field="divColorPicker">
         <g:DisclosurePanel ui:field="cpPanel">
-          <g:customHeader>
-            <g:Label ui:field="lblDisclosurePnl">Select New Color</g:Label>
-          </g:customHeader>
-
+          <g:header>Select New Color</g:header>
            <g:HTMLPanel>
              <div ui:field="divDisclosureBody">
               <cp:CPicker ui:field="cPicker"/>

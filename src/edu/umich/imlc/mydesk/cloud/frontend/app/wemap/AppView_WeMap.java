@@ -1,9 +1,14 @@
 package edu.umich.imlc.mydesk.cloud.frontend.app.wemap;
 
+import com.emitrom.lienzo.client.core.event.AbstractNodeMouseEvent;
 import com.emitrom.lienzo.client.core.event.NodeDragEndEvent;
 import com.emitrom.lienzo.client.core.event.NodeDragEndHandler;
 import com.emitrom.lienzo.client.core.event.NodeDragStartEvent;
 import com.emitrom.lienzo.client.core.event.NodeDragStartHandler;
+import com.emitrom.lienzo.client.core.event.NodeMouseEnterEvent;
+import com.emitrom.lienzo.client.core.event.NodeMouseEnterHandler;
+import com.emitrom.lienzo.client.core.event.NodeMouseExitEvent;
+import com.emitrom.lienzo.client.core.event.NodeMouseExitHandler;
 import com.emitrom.lienzo.client.core.event.NodeMouseUpEvent;
 import com.emitrom.lienzo.client.core.mediator.IMediator;
 import com.emitrom.lienzo.client.core.mediator.MousePanMediator;
@@ -12,10 +17,15 @@ import com.emitrom.lienzo.client.core.shape.GridLayer;
 import com.emitrom.lienzo.client.core.shape.IPrimitive;
 import com.emitrom.lienzo.client.core.shape.Line;
 import com.emitrom.lienzo.client.core.shape.Node;
+import com.emitrom.lienzo.client.core.shape.Shape;
 import com.emitrom.lienzo.client.core.shape.Viewport;
+import com.emitrom.lienzo.client.core.types.Point2D;
+import com.emitrom.lienzo.client.core.types.Transform;
 import com.emitrom.lienzo.shared.core.types.ColorName;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.MouseEvent;
+import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -31,6 +41,7 @@ import edu.umich.imlc.mydesk.cloud.frontend.BasicPresenter;
 import edu.umich.imlc.mydesk.cloud.frontend.PresentersView;
 import edu.umich.imlc.mydesk.cloud.frontend.app.drawables.CanvasPanel;
 import edu.umich.imlc.mydesk.cloud.frontend.app.drawables.LienzoLayer;
+import edu.umich.imlc.mydesk.cloud.frontend.app.obj.GWT_Node;
 
 /**
  * 
@@ -69,10 +80,8 @@ public class AppView_WeMap extends ResizeComposite
   CanvasPanel canvas = new CanvasPanel(CANVAS_WIDTH, CANVAS_HEIGHT);
   
   @UiField(provided=true)
-  RadioButton rbAdd = new RadioButton(MODE_SELECT_GROUP, "Add"),
-              rbDelete = new RadioButton(MODE_SELECT_GROUP, "Delete"),
-              rbMove = new RadioButton(MODE_SELECT_GROUP, "Move"),
-              rbSelect = new RadioButton(MODE_SELECT_GROUP, "Select");
+  RadioButton rbOvalAdd = new RadioButton(MODE_SELECT_GROUP, "Oval"),
+              rbEdgeAdd = new RadioButton(MODE_SELECT_GROUP, "Edge");
   
   // ---------------------------------------------------------------------------
   
@@ -81,13 +90,14 @@ public class AppView_WeMap extends ResizeComposite
   LienzoLayer baseLayer = null;
   App_WeMap presenter = null;
   
-  int centerX = 0, centerY = 0;
+  Point2D center = new Point2D(0,0);
   ModeType_e modeType = ModeType_e.NONE;
   
+  final NodeNotePanel nodeNotePnl = new NodeNotePanel();
   final LienzoMediator mediator = new LienzoMediator();
   final EditorOptionHandler editOptionHandler = new EditorOptionHandler();
   final EditNodeDialog nodeDialogBox = new EditNodeDialog(editOptionHandler);  
-  public final DragListener dragListener = new DragListener();
+  public final LienzoEventListener nodeListener = new LienzoEventListener();
   
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
@@ -100,24 +110,16 @@ public class AppView_WeMap extends ResizeComposite
     initModeSelectionPanel();    
     corePanel.getElement().getStyle().setBackgroundColor("white");
     doInitDraw();
-    /*    
-    Scheduler.get().scheduleDeferred( new Scheduler.ScheduledCommand()
-    {
-      @Override
-      public void execute()
-      { showNodeDialogBox(0, 0); }
-    });
-    */
   }
   
   // ---------------------------------------------------------------------------
   
   void initModeSelectionPanel()
   {
-    setMode(ModeType_e.ADD);
-    rbAdd.setValue(true);
-    rbMove.setValue(false);
-    rbDelete.setEnabled(false);
+    setMode(ModeType_e.OVAL_ADD);
+    rbOvalAdd.setValue(true);
+    rbEdgeAdd.setValue(false);
+    rbEdgeAdd.setEnabled(false);
   }
   
   // ---------------------------------------------------------------------------
@@ -125,19 +127,18 @@ public class AppView_WeMap extends ResizeComposite
   public void doInitDraw()
   {
     baseLayer = new LienzoLayer();
-    baseLayer.setNodeDragStartHandler(dragListener);
-    baseLayer.setNodeDragEndHandler(dragListener);
+    baseLayer.setNodeDragStartHandler(nodeListener);
+    baseLayer.setNodeDragEndHandler(nodeListener);    
+    baseLayer.setNodeMouseEnterHandler(nodeListener);
+    baseLayer.setNodeMouseExitHandler(nodeListener);
     canvas.add(baseLayer);
-    //canvas.getViewport().viewGlobalArea(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     
-    line1 = new Line(0, 0, 0, 0)
-      .setStrokeColor(ColorName.BLUE).setStrokeWidth(LINE_WIDTH);
-    line2 = new Line(0, 0, 0, 0)
-      .setStrokeColor(ColorName.GREEN).setStrokeWidth(LINE_WIDTH);
-    line2.setDashArray(2, 2); // the secondary lines are dashed lines
+    line1 = new Line(0, 0, 0, 0).setStrokeColor(ColorName.BLUE)
+        .setStrokeWidth(LINE_WIDTH);
+    line2 = new Line(0, 0, 0, 0).setStrokeColor(ColorName.GREEN)
+        .setStrokeWidth(LINE_WIDTH).setDashArray(2, 2);
     gridLayer = new GridLayer(200, line1, 50, line2);
-    canvas.setBackgroundLayer(gridLayer);
-    
+    canvas.setBackgroundLayer(gridLayer);    
     baseLayer.draw();
   }
   
@@ -146,9 +147,7 @@ public class AppView_WeMap extends ResizeComposite
   void checkPresenter()
   {
     if(presenter == null)
-    {
       throw new IllegalStateException();
-    }
   }
   
   // ---------------------------------------------------------------------------
@@ -165,40 +164,32 @@ public class AppView_WeMap extends ResizeComposite
   public void setPresenter(BasicPresenter p)
   {
     presenter = (App_WeMap) p;
-    updateUndoRedoButtons();
     presenter.setDrawingSurface(baseLayer);
+    updateUndoRedoButtons();
   }
   
   // ---------------------------------------------------------------------------
   
-  void showNodeDialogBox(int x, int y)
+  void showNewNodeEditor(int x, int y)
   {
-    centerX = x;
-    centerY = y;
+    Transform local = canvas.getViewport().getAbsoluteTransform();
+    Transform global = local.getInverse();
+    center.setX(x).setY(y);
+    global.transform(center, center);
     nodeDialogBox.show();
-  } 
+  }
   
   // ---------------------------------------------------------------------------
   
-  void setMode(ModeType_e mode)
+  void showNodeEditor(String objID)
   {
-    assert(canvas != null);
-    modeType = mode;
-    switch(mode)
-    {
-      case ADD: 
-        canvas.setEnableDragging(false);
-        if(!rbAdd.getValue())
-        { rbAdd.setValue(true); }
-        break;
-      case MOVE: 
-        canvas.setEnableDragging(true);
-        if(!rbMove.getValue())
-        { rbMove.setValue(true); }
-        break;
-      case DELETE: break;
-      default: break;
-    }
+    GWT_Node node = presenter.getNode(objID);
+    if(node == null)
+      throw new IllegalStateException();
+    String color = node.getColor();
+    String note = node.getNote();
+    String title = node.getTitle();
+    nodeDialogBox.show(objID, title, note, color);
   }
   
   // ---------------------------------------------------------------------------
@@ -223,17 +214,33 @@ public class AppView_WeMap extends ResizeComposite
   
   // ---------------------------------------------------------------------------
   
-  @UiHandler({"rbAdd", "rbDelete", "rbMove", "rbSelect"})
+  void setMode(ModeType_e mode)
+  {
+    assert(canvas != null);
+    modeType = mode;
+    switch(mode)
+    {
+      case OVAL_ADD:
+        break;
+      case EDGE_ADD:
+        break;
+      default: break;
+    }
+  }
+  
+  // ---------------------------------------------------------------------------
+  
+  @UiHandler({"rbOvalAdd", "rbEdgeAdd"})
   void doModeSelection(ClickEvent event)
   {
     Object src = event.getSource();
-    if(src == rbAdd)
+    if(src == rbEdgeAdd)
     {
-      setMode(ModeType_e.ADD);
+      setMode(ModeType_e.EDGE_ADD);
     }
-    else if(src == rbMove)
+    else if(src == rbOvalAdd)
     {
-      setMode(ModeType_e.MOVE);
+      setMode(ModeType_e.OVAL_ADD);
     }
   }
   
@@ -242,7 +249,7 @@ public class AppView_WeMap extends ResizeComposite
   
   static enum ModeType_e
   {
-    NONE, ADD, MOVE, DELETE;
+    NONE, OVAL_ADD, EDGE_ADD;
   }
 
   // ===========================================================================
@@ -251,13 +258,19 @@ public class AppView_WeMap extends ResizeComposite
   class EditorOptionHandler implements EditNodeDialog.OptionHandler
   {
     @Override
-    public void onConfirm(String title, String note, String color)
+    public void editNode(String objID, String title, String note, String color)
     {
       checkPresenter();
-      presenter.createNewNode(centerX, centerY, title, note, color);
-      baseLayer.draw();
-      updateUndoRedoButtons();
-      nodeDialogBox.hide();
+      presenter.editNode(objID, title, note, color);
+      closeDialogBox();
+    }
+    
+    @Override
+    public void createNewNode(String title, String note, String color)
+    {
+      checkPresenter();
+      presenter.createNewNode(center.getX(), center.getY(), title, note, color);
+      closeDialogBox();
     }
 
     @Override
@@ -265,12 +278,20 @@ public class AppView_WeMap extends ResizeComposite
     {
       nodeDialogBox.hide();
     }
+    
+    void closeDialogBox()
+    {
+      baseLayer.draw();
+      updateUndoRedoButtons();
+      nodeDialogBox.hide();
+    }
   }
   
   // ===========================================================================
   // ===========================================================================
   
-  class DragListener implements NodeDragEndHandler, NodeDragStartHandler
+  class LienzoEventListener implements NodeDragEndHandler, NodeDragStartHandler,
+    NodeMouseEnterHandler, NodeMouseExitHandler
   {
     String objID = null;
     double startX, startY, endX, endY;
@@ -298,9 +319,34 @@ public class AppView_WeMap extends ResizeComposite
       endX = node.getX();
       endY = node.getY();
       presenter.updateNodeMove(objID, startX, startY, endX, endY);
+      updateUndoRedoButtons();
       objID = null;      
     }
-  }
+
+    @Override
+    public void onNodeMouseExit(NodeMouseExitEvent event)
+    {
+      checkPresenter();
+      nodeNotePnl.hide();
+    }
+
+    @Override
+    public void onNodeMouseEnter(NodeMouseEnterEvent event)
+    {
+      checkPresenter();
+      int x = event.getX(), y = event.getY();
+      Shape<?> s = canvas.findShapeAtPoint(x, y);
+      if(s == null)
+        throw new IllegalStateException();
+      
+      String o = ((Node<?>) s).getID();
+      if(o == null)
+        throw new IllegalStateException();
+      String note = presenter.getNote(o);
+      nodeNotePnl.setNote(note);
+      nodeNotePnl.show(x + canvas.getAbsoluteLeft(), y + canvas.getAbsoluteTop());
+    }
+  } // LienzoEventListener
   
   // ===========================================================================
   // ===========================================================================
@@ -309,7 +355,6 @@ public class AppView_WeMap extends ResizeComposite
   {
     String name;
     boolean enabled = true;
-    
     MouseWheelZoomMediator zoomHndlr = new MouseWheelZoomMediator();
     MousePanMediator panHndlr = new MousePanMediator();
     
@@ -324,59 +369,51 @@ public class AppView_WeMap extends ResizeComposite
       canvas.pushMediator(this);
     }
     
+    @Override public void cancel() {}
+    
     // ---------------------------------------------------------------------------
     
     @Override
     public boolean handleEvent(GwtEvent<?> event)
     {
-      switch(modeType)
+      if(event instanceof AbstractNodeMouseEvent<?,?>)
       {
-        case ADD:
-          if(event instanceof NodeMouseUpEvent)
-          {
-            NodeMouseUpEvent e = (NodeMouseUpEvent) event;
-            showNodeDialogBox(e.getX(), e.getY());
-            return true;
-          }
-          break;
-        case MOVE:
-        {
-          if(panHndlr.handleEvent(event))
-            return true;
-          else if(zoomHndlr.handleEvent(event))
-            return true;
-          break;
-        }
-        case DELETE: case NONE: default: 
-          break;
-      }    
+        @SuppressWarnings("unchecked")
+        AbstractNodeMouseEvent <? extends MouseEvent<?>, ? extends EventHandler> 
+        aEvent = 
+        (AbstractNodeMouseEvent<? extends MouseEvent<?>, ? extends EventHandler>) 
+        event;
+                
+        if(doRightMouseButtonAction(aEvent))
+          return true;
+      }
+      if(panHndlr.handleEvent(event))
+        return true;
+      else if(zoomHndlr.handleEvent(event))
+        return true;
       return false;
     }
-
-    // ---------------------------------------------------------------------------
     
-    public void cancel()
-    {}
-
-    // ---------------------------------------------------------------------------
-    
-    public boolean isEnabled()
-    { return enabled; }
-
-    // ---------------------------------------------------------------------------
-    
-    public void setEnabled(boolean enabled)
-    { this.enabled = enabled; }
-
-    // ---------------------------------------------------------------------------
-    
-    public String getName()
-    { return name; }
-
-    // ---------------------------------------------------------------------------
-    
-    public void setName(String name)
-    { this.name = name; }
+    // -------------------------------------------------------------------------
+    boolean doRightMouseButtonAction(AbstractNodeMouseEvent
+        <? extends MouseEvent<?>, ? extends EventHandler> event)
+    {
+      if(!event.isButtonRight())
+        return false;
+      //if(event.)
+      int x = event.getX(), y = event.getY();
+      Shape<?> s = canvas.findShapeAtPoint(x, y);
+      if(s == null)
+        showNewNodeEditor(x, y);
+      else
+      {
+        String o = ((Node<?>) s).getID();
+        if(o == null)
+          throw new IllegalStateException();
+        showNodeEditor(o);
+      }
+      return true;
+    }
   } // LienzoMediator
 
   // ---------------------------------------------------------------------------

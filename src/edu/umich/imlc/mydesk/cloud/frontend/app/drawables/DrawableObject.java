@@ -10,6 +10,13 @@ public interface DrawableObject
   
   public void setPosition(double x, double y);
   
+  public void setColor(String color);
+  
+  public String getColor();
+  
+  public void setTitle(String title);
+  
+  public String getTitle();
   
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------

@@ -11,6 +11,7 @@ import com.emitrom.lienzo.client.core.mediator.IMediator;
 import com.emitrom.lienzo.client.core.mediator.Mediators;
 import com.emitrom.lienzo.client.core.shape.Layer;
 import com.emitrom.lienzo.client.core.shape.Scene;
+import com.emitrom.lienzo.client.core.shape.Shape;
 import com.emitrom.lienzo.client.core.shape.Viewport;
 import com.emitrom.lienzo.shared.core.types.DataURLType;
 import com.emitrom.lienzo.shared.core.types.IColor;
@@ -243,6 +244,13 @@ public class CanvasPanel extends FocusPanel
     m_view.pushMediator(mediator);
   }
 
+  // ---------------------------------------------------------------------------
+  
+  public Shape<?> findShapeAtPoint(int x, int y)
+  {
+    return m_view.findShapeAtPoint(x, y);
+  }
+  
   // ---------------------------------------------------------------------------
   
   public static native void enableWindowMouseWheelScroll(boolean enabled)

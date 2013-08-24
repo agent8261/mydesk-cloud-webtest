@@ -12,33 +12,27 @@ public class GWT_Node
   // Allows for on demand dependency injection
   protected static final AppGinInjector appInjector = GWT.create(AppGinInjector.class);
   
-  protected final DrawableObjectFactory factory;
+  protected static final DrawableObjectFactory 
+    factory = appInjector.getDrawableObjectFactory();
   
-  DrawableObject drawableObject = null;
-  String title = null;
+  final DrawableObject drawableObject;
   String note = null;
   
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
   
-  public GWT_Node()
+  protected GWT_Node(DrawableObject obj, String note)
   {
-    this(null, null);
-  }
-  
-  // ---------------------------------------------------------------------------
-  
-  public GWT_Node(String title, String note)
-  {
-    factory = appInjector.getDrawableObjectFactory();
-    this.title = title; this.note = note;
+    if(obj == null)
+      throw new IllegalArgumentException();
+    drawableObject = obj;
+    this.note = note;
   }
   
   // ---------------------------------------------------------------------------
   
   public final String getObjectID()
   {
-    checkDrawnObject();
     return drawableObject.getObjectID();
   }
   
@@ -46,7 +40,6 @@ public class GWT_Node
   
   public final DrawableObject getDrawnObject()
   {
-    checkDrawnObject();
     return drawableObject;
   }
   
@@ -54,53 +47,49 @@ public class GWT_Node
   
   public final void setPosition(double x, double y)
   {
-    checkDrawnObject();
     drawableObject.setPosition(x, y);
   }
   
   // ---------------------------------------------------------------------------
   
-  protected final void setDrawnObject(DrawableObject drawableObject)
+  public final String getTitle()
   {
-    this.drawableObject = drawableObject;
-    checkDrawnObject();
-  }
-  
-  
-  // ---------------------------------------------------------------------------
-  
-  protected final String getTitle()
-  {
-    return title;
+    return drawableObject.getTitle();
   }
 
   // ---------------------------------------------------------------------------
   
-  protected final void setTitle(String title)
+  public final void setTitle(String title)
   {
-    this.title = title;
+    drawableObject.setTitle(title);
   }
 
   // ---------------------------------------------------------------------------
   
-  protected final String getNote()
+  public final String getColor()
+  {
+    return drawableObject.getColor();
+  }
+  
+  // ---------------------------------------------------------------------------
+  
+  public final void setColor(String color)
+  {
+    drawableObject.setColor(color);
+  }
+  
+  // ---------------------------------------------------------------------------
+  
+  public final String getNote()
   {
     return note;
   }
 
   // ---------------------------------------------------------------------------
   
-  protected final void setNote(String note)
+  public final void setNote(String note)
   {
     this.note = note;
-  }
-  
-  // ---------------------------------------------------------------------------
-  
-  protected final void checkDrawnObject()
-  {
-    if(drawableObject == null)
-      throw new IllegalStateException();
   }
   
   // --------------------------------------------------------------------------- 

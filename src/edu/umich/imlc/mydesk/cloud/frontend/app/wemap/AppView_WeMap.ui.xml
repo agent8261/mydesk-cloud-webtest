@@ -15,10 +15,8 @@
  <g:FlowPanel>
     <g:HorizontalPanel ui:field="modeSelectionPanel">
       <g:InlineLabel ui:field="ilblMode" text="Mode: "/>
-      <g:RadioButton ui:field="rbAdd"/>
-      <g:RadioButton ui:field="rbDelete"/>
-      <g:RadioButton ui:field="rbMove"/>
-      <g:RadioButton ui:field="rbSelect"/>
+      <g:RadioButton ui:field="rbOvalAdd"/>
+      <g:RadioButton ui:field="rbEdgeAdd"/>
       <g:Button ui:field="btnUndo" text="Undo"/>
       <g:Button ui:field="btnRedo" text="Redo"/>
     </g:HorizontalPanel>

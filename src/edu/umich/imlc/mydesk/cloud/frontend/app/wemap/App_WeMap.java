@@ -35,6 +35,8 @@ public class App_WeMap extends BasicPresenterClass
   public App_WeMap()
   {
     weMapView.setPresenter(this);
+    createNewNode(30, 30, "Foo", "A Bar of Soap", "#000000");
+    surface.draw();
   }
   
   // ---------------------------------------------------------------------------
@@ -54,8 +56,38 @@ public class App_WeMap extends BasicPresenterClass
   
   // ---------------------------------------------------------------------------
   
+  public GWT_Node getNode(String objID)
+  {
+    return allNodes.get(objID);
+  }
+  
+  // ---------------------------------------------------------------------------
+  
+  public void editNode(String objID, String title, String note, String color)
+  {
+    GWT_Node node = allNodes.get(objID);
+    if(node == null)
+      throw new IllegalStateException();
+    String oldT = node.getTitle(), 
+        oldN = node.getNote(), oldC = node.getColor();
+    Command cmd = new CmdEditNode(objID, oldT, oldN, oldC, title, note, color);
+    doCommand(cmd);
+  }
+  
+  // ---------------------------------------------------------------------------
+  
+  public String getNote(String objID)
+  {
+    GWT_Node node = allNodes.get(objID);    
+    if(node == null)
+      throw new IllegalStateException();
+    return node.getNote();
+  }
+  
+  // ---------------------------------------------------------------------------
+  
   public void createNewNode
-    (int centerX, int centerY, String title, String note, String color)
+    (double centerX, double centerY, String title, String note, String color)
   {
     checkDrawingSurface();
     String objID = ID_HEAD + NEXT_OBJ_ID++;
@@ -98,9 +130,7 @@ public class App_WeMap extends BasicPresenterClass
     checkDrawingSurface();
     int last = undoStack.size() - 1;
     if(last < 0)
-    {
       return;
-    }
     Command cmd = undoStack.remove(last);
     redoStack.add(cmd);
     cmd.undoCommand();
@@ -115,9 +145,7 @@ public class App_WeMap extends BasicPresenterClass
     checkDrawingSurface();
     int last = redoStack.size() - 1;
     if(last < 0)
-    {
       return;
-    }
     Command cmd = redoStack.remove(last);
     undoStack.add(cmd);
     cmd.doCommand();
@@ -134,6 +162,16 @@ public class App_WeMap extends BasicPresenterClass
     redoStack.clear();
     cmd.doCommand();
     surface.draw();
+  }
+  
+  // ---------------------------------------------------------------------------
+  
+  GWT_Node getNodeChecked(String objID)
+  {
+    GWT_Node node = allNodes.get(objID);
+    if(node == null)
+      throw new IllegalStateException();
+    return node;
   }
   
   // ---------------------------------------------------------------------------
@@ -156,6 +194,44 @@ public class App_WeMap extends BasicPresenterClass
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
   
+  class CmdEditNode implements Command
+  {
+    final String objID;
+    final String oTitle, oNote, oColor;
+    final String nTitle, nNote, nColor;
+    
+    CmdEditNode(String objID, String oldtitle, String oldNote, String oldColor,
+        String newTitle, String newNote, String newColor)
+    {
+      this.objID = objID; oTitle = oldtitle; oNote = oldNote;
+      oColor = oldColor; nTitle = newTitle; nNote = newNote; nColor = newColor;
+    }
+
+    @Override
+    public void doCommand()
+    {
+      setNode(nTitle, nNote, nColor);
+    }
+
+    @Override
+    public void undoCommand()
+    {
+      setNode(oTitle, oNote, oColor);
+    }
+    
+    void setNode(String t, String n, String c)
+    {
+      GWT_Node node = getNodeChecked(objID);
+      node.setColor(c);
+      node.setTitle(t);
+      node.setNote(n);
+      surface.draw();
+    }
+  }
+  
+  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  
   class CmdMoveNode implements Command
   {
     final String objID;
@@ -170,9 +246,7 @@ public class App_WeMap extends BasicPresenterClass
     
     void move(double x, double y)
     {
-      GWT_Node node = allNodes.get(objID);
-      if(node == null)
-        throw new IllegalStateException();
+      GWT_Node node = getNodeChecked(objID);
       node.setPosition(x, y);
     }
     
@@ -194,13 +268,13 @@ public class App_WeMap extends BasicPresenterClass
   
   class CmdCreateNewNode implements Command
   {
-    final int centerX, centerY;
+    final double centerX, centerY;
     final String title, note, color, objID;
     
     // -------------------------------------------------------------------------
     // -------------------------------------------------------------------------
     
-    CmdCreateNewNode(int centerX, int centerY, String title, 
+    CmdCreateNewNode(double centerX, double centerY, String title, 
         String note, String color, String objID)
     {
       this.centerX = centerX; this.centerY = centerY; this.title = title;
@@ -223,11 +297,7 @@ public class App_WeMap extends BasicPresenterClass
     @Override
     public void undoCommand()
     {
-      GWT_Node node = allNodes.get(objID);
-      if(node == null)
-      {
-        throw new IllegalStateException();
-      }
+      GWT_Node node = getNodeChecked(objID);
       DrawableObject dObj = node.getDrawnObject();
       dObj.removeFrom(surface);
       allNodes.remove(objID);

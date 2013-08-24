@@ -2,6 +2,7 @@ package edu.umich.imlc.mydesk.cloud.frontend.app.wemap;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -12,10 +13,10 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DisclosurePanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+
 
 public class EditNodeDialog extends Composite 
   implements ClickHandler, PopupPanel.PositionCallback
@@ -24,7 +25,8 @@ public class EditNodeDialog extends Composite
   
   public static interface OptionHandler
   {
-    void onConfirm(String title, String note, String color);
+    void editNode(String objID, String title, String note, String color);
+    void createNewNode(String title, String note, String color);
     void onCancel();
   }
   
@@ -41,13 +43,14 @@ public class EditNodeDialog extends Composite
   private static final int CPICKER_TOP_OFFSET = 205;
   private static final int CPICKER_LEFT_OFFSET = 158;
   private static final String DEFAULT_COLOR = "#000000";
+  static final String CREATE_TITLE = "Create a New Node";
+  static final String EDIT_TITLE = "Edit a Node";
+  
   // ---------------------------------------------------------------------------
   @UiField
   DivElement divCurrentColor;
   @UiField
   DisclosurePanel cpPanel;
-  @UiField
-  Label lblDisclosurePnl;
   @UiField
   CPicker cPicker;
   @UiField
@@ -62,6 +65,11 @@ public class EditNodeDialog extends Composite
   final ColorPickerHandler cpHandler = new ColorPickerHandler();
   final OptionHandler optHandler;  
   String currentColor = null;
+  String objID;
+  
+  DialogBox.Caption c;
+  boolean isEditing = false;
+  
   
   // ---------------------------------------------------------------------------
   
@@ -76,8 +84,28 @@ public class EditNodeDialog extends Composite
 
   // ---------------------------------------------------------------------------
   
+  public void show(String objID, String title, String note, String color)
+  {
+    if(!isEditing)
+    {
+      isEditing = true;
+      dialogBox.setTitle(EDIT_TITLE);
+    }
+    this.objID = objID;
+    tboxTitle.setText(title); tboxNote.setText(note);
+    setCurrentColor(color);
+    dialogBox.setPopupPositionAndShow(this);
+  }
+  
+  // ---------------------------------------------------------------------------
+  
   public void show()
   {
+    if(isEditing)
+    {
+      isEditing = false;
+      dialogBox.setTitle(CREATE_TITLE);
+    }
     dialogBox.setPopupPositionAndShow(this);
   }
   
@@ -117,7 +145,10 @@ public class EditNodeDialog extends Composite
       String color = (currentColor != null) ? currentColor : DEFAULT_COLOR;
       tboxTitle.setText("");
       tboxNote.setText("");
-      optHandler.onConfirm(title, note, color);
+      if(isEditing)
+        optHandler.editNode(objID, title, note, color);
+      else
+        optHandler.createNewNode(title, note, color);
     }
   }
 
@@ -125,12 +156,22 @@ public class EditNodeDialog extends Composite
 
   private void doCtor()
   {
-    dialogBox.setText("Add Node");
+    dialogBox.setText(CREATE_TITLE);
     dialogBox.setAnimationEnabled(true);
     dialogBox.setGlassEnabled(true);
     cPicker.addButtonHandler(cpHandler);
     btnConfirm.addClickHandler(this);
     btnCancel.addClickHandler(this);
+    setCurrentColor(DEFAULT_COLOR);
+  }
+  
+  // ---------------------------------------------------------------------------
+  
+  private void setCurrentColor(String color)
+  {
+    currentColor = color;
+    Style s = divCurrentColor.getStyle(); 
+    s.setBackgroundColor(currentColor);
   }
 
   // ---------------------------------------------------------------------------
@@ -141,11 +182,9 @@ public class EditNodeDialog extends Composite
     @Override
     public void onOk(String selectedColor)
     {
-      System.out.println("Color : " + selectedColor);
-      currentColor = selectedColor;
-      divCurrentColor.getStyle().setBackgroundColor(currentColor);
+      setCurrentColor(selectedColor);
+      cpPanel.setOpen(false);
     }
-
     @Override
     public void onCancel()
     {

@@ -32,6 +32,7 @@ import com.emitrom.lienzo.client.widget.DragContext;
 import com.emitrom.lienzo.shared.core.types.NodeType;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Touch;
 import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -558,6 +559,11 @@ final class CanvasHandlerManager
       event.preventDefault();
       NodeMouseDownEvent nodeEvent = new NodeMouseDownEvent(event);
       
+      if(event.getNativeButton() == NativeEvent.BUTTON_RIGHT)
+      {
+        m_mediators.handleEvent(nodeEvent);
+        return;
+      }
       m_dragging_mouse_pressed = true;
       doPrepareDragging(nodeEvent);
       if(m_dragging)

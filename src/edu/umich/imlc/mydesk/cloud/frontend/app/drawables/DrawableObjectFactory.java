@@ -7,7 +7,12 @@ public interface DrawableObjectFactory
   // ---------------------------------------------------------------------------
   
   public DrawableObject createOvalNode
-    (double x, double y, String color, String title, String objID, DrawingSurface drawingSurface);
+    (double x, double y, String color, String title, 
+     String objID, DrawingSurface drawingSurface);
+  
+  // ---------------------------------------------------------------------------
+  
+  public DrawableObject createEdge();
   
   // ---------------------------------------------------------------------------
 }

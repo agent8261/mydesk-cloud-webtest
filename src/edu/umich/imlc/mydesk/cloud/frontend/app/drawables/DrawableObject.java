@@ -22,7 +22,7 @@ public interface DrawableObject
   // ---------------------------------------------------------------------------
   
   /** 
-   * Marks a objects as a surface that Drawable can be added to
+   * Marks a objects as a surface that DrawableObjects can be added to
    * The methods of adding however will be implementation specific
    */
   public static interface DrawingSurface

@@ -54,7 +54,7 @@ public class CanvasPanel extends FocusPanel
       setPixelSize(wide, high);
       m_events = new CanvasHandlerManager(this);
       initResizeTimer();
-      addHandlers();
+      Window.addResizeHandler(new CanvasResizeHandler());
     }
     else
     {
@@ -71,35 +71,23 @@ public class CanvasPanel extends FocusPanel
   // ---------------------------------------------------------------------------
   
   public CanvasPanel add(Layer layer)
-  {
-    getScene().add(layer);
-    return this;
-  }
+  { getScene().add(layer); return this; }
 
   // ---------------------------------------------------------------------------
   
   public CanvasPanel remove(Layer layer)
-  {
-    getScene().remove(layer);
-    return this;
-  }
+  { getScene().remove(layer); return this; }
 
   // ---------------------------------------------------------------------------
   
   public CanvasPanel removeAll()
-  {
-    getScene().removeAll();
-    return this;
-  }
+  { getScene().removeAll(); return this; }
 
   // ---------------------------------------------------------------------------
   
   @Override
   public void setPixelSize(int wide, int high)
-  {
-    super.setPixelSize(wide, high);
-    m_view.setPixelSize(wide, high);
-  }
+  { super.setPixelSize(wide, high); m_view.setPixelSize(wide, high); }
 
   // ---------------------------------------------------------------------------
   
@@ -118,23 +106,17 @@ public class CanvasPanel extends FocusPanel
   // ---------------------------------------------------------------------------
   
   public Scene getScene()
-  {
-    return m_view.getScene();
-  }
+  { return m_view.getScene(); }
 
   // ---------------------------------------------------------------------------
   
   public Viewport getViewport()
-  {
-    return m_view;
-  }
+  { return m_view; }
 
   // ---------------------------------------------------------------------------
   
   public void setBackgroundLayer(Layer layer)
-  {
-    m_view.setBackgroundLayer(layer);
-  }
+  { m_view.setBackgroundLayer(layer); }
 
   // ---------------------------------------------------------------------------
   
@@ -212,7 +194,6 @@ public class CanvasPanel extends FocusPanel
   public CanvasPanel setBackgroundColor(String color)
   {
     getElement().getStyle().setBackgroundColor(color);
-
     return this;
   }
 
@@ -282,13 +263,6 @@ public class CanvasPanel extends FocusPanel
   }
   
   // ---------------------------------------------------------------------------
-  
-  private void addHandlers()
-  {
-    Window.addResizeHandler(new CanvasResizeHandler());
-  }
-
-  // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
   
   class CanvasResizeHandler implements ResizeHandler
@@ -322,14 +296,14 @@ public class CanvasPanel extends FocusPanel
         getViewport().getHandlerManager().fireEvent(new OrientationChangeEvent(w, h));
       }
 
-      Scheduler.get().scheduleDeferred(new ScheduledCommand()
-      {
-        @Override
-        public void execute()
-        {
-          m_view.draw();
-        }
-      });
+      Scheduler.get().scheduleDeferred(new DeferedDrawCommand());
+    }
+    
+    class DeferedDrawCommand implements ScheduledCommand
+    {
+      @Override
+      public void execute()
+      { m_view.draw(); }
     }
   }
   

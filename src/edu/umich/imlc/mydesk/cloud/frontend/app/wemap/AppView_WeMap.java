@@ -353,10 +353,9 @@ public class AppView_WeMap extends ResizeComposite
   
   class LienzoMediator implements IMediator
   {
-    String name;
-    boolean enabled = true;
     MouseWheelZoomMediator zoomHndlr = new MouseWheelZoomMediator();
     MousePanMediator panHndlr = new MousePanMediator();
+    boolean isCreatingLink = false;
     
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -372,7 +371,6 @@ public class AppView_WeMap extends ResizeComposite
     @Override public void cancel() {}
     
     // ---------------------------------------------------------------------------
-    
     @Override
     public boolean handleEvent(GwtEvent<?> event)
     {
@@ -400,9 +398,16 @@ public class AppView_WeMap extends ResizeComposite
     {
       if(!event.isButtonRight())
         return false;
-      //if(event.)
       int x = event.getX(), y = event.getY();
       Shape<?> s = canvas.findShapeAtPoint(x, y);
+      switch(modeType)
+      {
+        default: break;
+        case OVAL_ADD:
+          break;
+        case EDGE_ADD:
+          break;
+      }
       if(s == null)
         showNewNodeEditor(x, y);
       else
@@ -415,6 +420,5 @@ public class AppView_WeMap extends ResizeComposite
       return true;
     }
   } // LienzoMediator
-
   // ---------------------------------------------------------------------------
 }

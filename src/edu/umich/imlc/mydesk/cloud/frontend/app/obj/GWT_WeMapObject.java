@@ -6,53 +6,60 @@ import edu.umich.imlc.mydesk.cloud.frontend.AppGinInjector;
 import edu.umich.imlc.mydesk.cloud.frontend.app.drawables.DrawableObject;
 import edu.umich.imlc.mydesk.cloud.frontend.app.drawables.DrawableObjectFactory;
 
-
-public class GWT_Node extends GWT_WeMapObject
+public class GWT_WeMapObject
 {
   // Allows for on demand dependency injection
   protected static final AppGinInjector appInjector = GWT.create(AppGinInjector.class);
   
   protected static final DrawableObjectFactory 
-    factory = appInjector.getDrawableObjectFactory();
+  factory = appInjector.getDrawableObjectFactory();
   
-  String note = null;
+  protected final DrawableObject drawableObject;
   
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
   
-  protected GWT_Node(DrawableObject obj, String note)
+  public GWT_WeMapObject(DrawableObject obj)
   {
-    super(obj);
-    this.note = note;
-  }
-  
-  // ---------------------------------------------------------------------------
-  
-  public final String getTitle()
-  {
-    return drawableObject.getTitle();
+    if(obj == null)
+      throw new IllegalArgumentException();
+    drawableObject = obj;
   }
 
   // ---------------------------------------------------------------------------
   
-  public final void setTitle(String title)
+  public final void setPosition(double x, double y)
   {
-    drawableObject.setTitle(title);
+    drawableObject.setPosition(x, y);
   }
   
   // ---------------------------------------------------------------------------
   
-  public final String getNote()
+  public final String getObjectID()
   {
-    return note;
+    return drawableObject.getObjectID();
   }
-
+  
   // ---------------------------------------------------------------------------
   
-  public final void setNote(String note)
+  public final DrawableObject getDrawnObject()
   {
-    this.note = note;
+    return drawableObject;
   }
   
-  // --------------------------------------------------------------------------- 
+  // ---------------------------------------------------------------------------
+  
+  public final String getColor()
+  {
+    return drawableObject.getColor();
+  }
+  
+  // ---------------------------------------------------------------------------
+  
+  public final void setColor(String color)
+  {
+    drawableObject.setColor(color);
+  }
+  
+  // ---------------------------------------------------------------------------
 }

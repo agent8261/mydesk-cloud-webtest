@@ -22,7 +22,7 @@ public class App_WeMap extends BasicPresenterClass
 {
   static final String ID_HEAD = Long.toString((new Date()).getTime());
   static long NEXT_OBJ_ID = 0;
-  PresentersView weMapView = new AppView_WeMap();
+  PresentersView weMapView = new UIController();
   
   DrawingSurface surface = null;
   HashMap<String, GWT_Node> allNodes = new HashMap<String, GWT_Node>();

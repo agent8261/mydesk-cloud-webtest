@@ -12,7 +12,7 @@ public interface DrawableObjectFactory
   
   // ---------------------------------------------------------------------------
   
-  public DrawableObject createEdge();
+  //public DrawableObject createEdge();
   
   // ---------------------------------------------------------------------------
 }

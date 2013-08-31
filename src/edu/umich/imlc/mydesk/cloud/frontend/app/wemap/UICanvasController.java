@@ -1,7 +1,8 @@
-package edu.umich.imlc.mydesk.cloud.frontend.app.drawables;
+package edu.umich.imlc.mydesk.cloud.frontend.app.wemap;
 
 import java.util.ArrayList;
 
+import com.emitrom.lienzo.client.core.event.AbstractNodeMouseEvent;
 import com.emitrom.lienzo.client.core.event.INodeXYEvent;
 import com.emitrom.lienzo.client.core.event.NodeDragEndEvent;
 import com.emitrom.lienzo.client.core.event.NodeDragMoveEvent;
@@ -25,9 +26,12 @@ import com.emitrom.lienzo.client.core.event.NodeTouchMoveEvent;
 import com.emitrom.lienzo.client.core.event.NodeTouchStartEvent;
 import com.emitrom.lienzo.client.core.event.TouchPoint;
 import com.emitrom.lienzo.client.core.mediator.Mediators;
+import com.emitrom.lienzo.client.core.mediator.MousePanMediator;
+import com.emitrom.lienzo.client.core.mediator.MouseWheelZoomMediator;
 import com.emitrom.lienzo.client.core.shape.IPrimitive;
 import com.emitrom.lienzo.client.core.shape.Node;
 import com.emitrom.lienzo.client.core.shape.Shape;
+import com.emitrom.lienzo.client.core.shape.Viewport;
 import com.emitrom.lienzo.client.widget.DragContext;
 import com.emitrom.lienzo.shared.core.types.NodeType;
 import com.google.gwt.core.client.JsArray;
@@ -47,6 +51,7 @@ import com.google.gwt.event.dom.client.GestureStartEvent;
 import com.google.gwt.event.dom.client.GestureStartHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
+import com.google.gwt.event.dom.client.MouseEvent;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseMoveHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
@@ -66,19 +71,23 @@ import com.google.gwt.event.dom.client.TouchMoveEvent;
 import com.google.gwt.event.dom.client.TouchMoveHandler;
 import com.google.gwt.event.dom.client.TouchStartEvent;
 import com.google.gwt.event.dom.client.TouchStartHandler;
+import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.GwtEvent.Type;
 
 /*
- * This is an alteration of LienzoHandlerManger
+ * Responsible for handling user interaction with the Canvas panel
+ * This is an based on LienzoHandlerManger
  */
-final class CanvasHandlerManager implements ClickHandler, DoubleClickHandler,
+final class UICanvasController implements ClickHandler, DoubleClickHandler,
   MouseMoveHandler, MouseUpHandler, MouseDownHandler, MouseOutHandler,
   MouseOverHandler, MouseWheelHandler, TouchCancelHandler, TouchEndHandler,
   TouchMoveHandler, TouchStartHandler, GestureStartHandler, GestureEndHandler,
   GestureChangeHandler
 {
-  private final CanvasPanel m_lienzo;
+  private final CanvasPanel canvas;
+  private final UIController uiController;
+  
   private boolean m_dragging = false;
   private boolean m_dragging_using_touches = false;
   private boolean m_dragging_dispatch_move = false;
@@ -92,15 +101,22 @@ final class CanvasHandlerManager implements ClickHandler, DoubleClickHandler,
 
   ArrayList<TouchPoint> m_touches = null;
   private Mediators m_mediators;
-
+  MouseWheelZoomMediator zoomHndlr = new MouseWheelZoomMediator();
+  MousePanMediator panHndlr = new MousePanMediator();
+  
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
 
-  public CanvasHandlerManager(CanvasPanel lienzo)
+  public UICanvasController(CanvasPanel canvasPanel, UIController controller)
   {
-    m_lienzo = lienzo;
-    m_mediators = lienzo.getViewport().getMediators();
-    if(null != m_lienzo)
+    uiController = controller;
+    canvas = canvasPanel;
+    Viewport vp = canvas.getViewport();
+    zoomHndlr.setViewport(vp);
+    panHndlr.setViewport(vp);
+    
+    m_mediators = vp.getMediators();
+    if(null != canvas)
       addHandlers();
   }
 
@@ -135,7 +151,7 @@ final class CanvasHandlerManager implements ClickHandler, DoubleClickHandler,
   {
     event.preventDefault();
     NodeMouseMoveEvent nodeEvent = new NodeMouseMoveEvent(event);
-    if(m_mediators.handleEvent(nodeEvent))
+    if(doDefaltAction(nodeEvent)) 
       return;
     onNodeMouseMove(nodeEvent);
   }
@@ -147,7 +163,7 @@ final class CanvasHandlerManager implements ClickHandler, DoubleClickHandler,
   {
     event.preventDefault();
     NodeMouseUpEvent nodeEvent = new NodeMouseUpEvent(event);
-    if(m_mediators.handleEvent(nodeEvent))
+    if(doDefaltAction(nodeEvent)) 
       return;
     onNodeMouseUp(nodeEvent);
   }
@@ -162,14 +178,14 @@ final class CanvasHandlerManager implements ClickHandler, DoubleClickHandler,
 
     if(event.getNativeButton() == NativeEvent.BUTTON_RIGHT)
     {
-      m_mediators.handleEvent(nodeEvent);
+      doDefaltAction(nodeEvent);
       return;
     }
     m_dragging_mouse_pressed = true;
     doPrepareDragging(nodeEvent);
     if(m_dragging)
       return;
-    if(m_mediators.handleEvent(nodeEvent))
+    if(doDefaltAction(nodeEvent)) 
       return;
     fireDefaultEvent(nodeEvent);
   }
@@ -181,7 +197,7 @@ final class CanvasHandlerManager implements ClickHandler, DoubleClickHandler,
   {
     event.preventDefault();
     NodeMouseOutEvent nodeEvent = new NodeMouseOutEvent(event);
-    if(m_mediators.handleEvent(nodeEvent))
+    if(doDefaltAction(nodeEvent)) 
       return;
     onNodeMouseOut(nodeEvent);
   }
@@ -193,7 +209,7 @@ final class CanvasHandlerManager implements ClickHandler, DoubleClickHandler,
   {
     event.preventDefault();
     NodeMouseOverEvent nodeEvent = new NodeMouseOverEvent(event);
-    if(m_mediators.handleEvent(nodeEvent))
+    if(doDefaltAction(nodeEvent)) 
       return;
     onNodeMouseOver(nodeEvent);
   }
@@ -204,7 +220,7 @@ final class CanvasHandlerManager implements ClickHandler, DoubleClickHandler,
   {
     event.preventDefault();
     NodeMouseWheelEvent nodeEvent = new NodeMouseWheelEvent(event);
-    if(false == m_mediators.handleEvent(nodeEvent))
+    if(false == doDefaltAction(nodeEvent))
     {
       fireEvent(nodeEvent);
     }
@@ -219,7 +235,7 @@ final class CanvasHandlerManager implements ClickHandler, DoubleClickHandler,
     event.preventDefault();
     NodeTouchCancelEvent nodeEvent =
       new NodeTouchCancelEvent(getTouches(event));
-    if(m_mediators.handleEvent(event))
+    if(doDefaltAction(nodeEvent))
       return;
     onNodeMouseOut(nodeEvent);
   }
@@ -231,7 +247,7 @@ final class CanvasHandlerManager implements ClickHandler, DoubleClickHandler,
   {
     event.preventDefault();
     NodeTouchEndEvent nodeEvent = new NodeTouchEndEvent(m_touches);
-    if(m_mediators.handleEvent(nodeEvent))
+    if(doDefaltAction(nodeEvent)) 
       return;
     onNodeMouseUp(nodeEvent);
   }
@@ -243,7 +259,7 @@ final class CanvasHandlerManager implements ClickHandler, DoubleClickHandler,
     event.preventDefault();
     m_touches = getTouches(event);
     NodeTouchMoveEvent nodeEvent = new NodeTouchMoveEvent(m_touches);
-    if(m_mediators.handleEvent(nodeEvent))
+    if(doDefaltAction(nodeEvent)) 
       return;
     onNodeMouseMove(nodeEvent);
   }
@@ -255,7 +271,7 @@ final class CanvasHandlerManager implements ClickHandler, DoubleClickHandler,
     event.preventDefault();
     m_touches = getTouches(event);
     NodeTouchStartEvent nodeEvent = new NodeTouchStartEvent(m_touches);
-    if(m_mediators.handleEvent(nodeEvent))
+    if(doDefaltAction(nodeEvent)) 
       return;
     onNodeMouseDown(nodeEvent);
   }
@@ -267,7 +283,7 @@ final class CanvasHandlerManager implements ClickHandler, DoubleClickHandler,
     event.preventDefault();
     NodeGestureStartEvent nodeEvent =
       new NodeGestureStartEvent(event.getScale(), event.getRotation());
-    if(m_mediators.handleEvent(nodeEvent))
+    if(doDefaltAction(nodeEvent)) 
       return;
     fireEvent(nodeEvent);
   }
@@ -280,7 +296,7 @@ final class CanvasHandlerManager implements ClickHandler, DoubleClickHandler,
     event.preventDefault();
     NodeGestureEndEvent nodeEvent =
       new NodeGestureEndEvent(event.getScale(), event.getRotation());
-    if(m_mediators.handleEvent(nodeEvent))
+    if(doDefaltAction(nodeEvent)) 
       return;
     fireEvent(nodeEvent);
   }
@@ -293,7 +309,7 @@ final class CanvasHandlerManager implements ClickHandler, DoubleClickHandler,
     event.preventDefault();
     NodeGestureChangeEvent nodeEvent =
       new NodeGestureChangeEvent(event.getScale(), event.getRotation());
-    if(m_mediators.handleEvent(nodeEvent))
+    if(doDefaltAction(nodeEvent)) 
       return;
     fireEvent(nodeEvent);
   }
@@ -301,25 +317,49 @@ final class CanvasHandlerManager implements ClickHandler, DoubleClickHandler,
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
 
+  boolean doDefaltAction(GwtEvent<?> event)
+  {
+    if(event instanceof AbstractNodeMouseEvent<?,?>)
+    {
+      @SuppressWarnings("unchecked")
+      AbstractNodeMouseEvent <? extends MouseEvent<?>, ? extends EventHandler> 
+      aEvent = 
+      (AbstractNodeMouseEvent<? extends MouseEvent<?>, ? extends EventHandler>) 
+      event;
+              
+      if(uiController.doRightMouseButtonAction(aEvent))
+        return true;
+    }
+    if(panHndlr.handleEvent(event))
+      return true;
+    if(zoomHndlr.handleEvent(event))
+      return true;
+    if(m_mediators.handleEvent(event))
+      return true;
+    return false;
+  }
+  
+  // ---------------------------------------------------------------------------
+  
   private final void addHandlers()
   {
-    m_lienzo.addClickHandler(this);
-    m_lienzo.addDoubleClickHandler(this);
-    m_lienzo.addMouseMoveHandler(this);
-    m_lienzo.addMouseUpHandler(this);
-    m_lienzo.addMouseDownHandler(this);
-    m_lienzo.addMouseOutHandler(this);
-    m_lienzo.addMouseOverHandler(this);
+    canvas.addClickHandler(this);
+    canvas.addDoubleClickHandler(this);
+    canvas.addMouseMoveHandler(this);
+    canvas.addMouseUpHandler(this);
+    canvas.addMouseDownHandler(this);
+    canvas.addMouseOutHandler(this);
+    canvas.addMouseOverHandler(this);
 
-    m_lienzo.addMouseWheelHandler(this);
-    m_lienzo.addTouchCancelHandler(this);
-    m_lienzo.addTouchEndHandler(this);
-    m_lienzo.addTouchMoveHandler(this);
+    canvas.addMouseWheelHandler(this);
+    canvas.addTouchCancelHandler(this);
+    canvas.addTouchEndHandler(this);
+    canvas.addTouchMoveHandler(this);
 
-    m_lienzo.addTouchStartHandler(this);
-    m_lienzo.addGestureStartHandler(this);
-    m_lienzo.addGestureEndHandler(this);
-    m_lienzo.addGestureChangeHandler(this);
+    canvas.addTouchStartHandler(this);
+    canvas.addGestureStartHandler(this);
+    canvas.addGestureEndHandler(this);
+    canvas.addGestureChangeHandler(this);
   }
 
   // ---------------------------------------------------------------------------
@@ -438,7 +478,6 @@ final class CanvasHandlerManager implements ClickHandler, DoubleClickHandler,
 
   private final void onNodeMouseOut(INodeXYEvent event)
   {
-    // in case someone does a pop up (Window.alert() )
     m_dragging_mouse_pressed = false;
     if(m_dragging)
       doDragCancel(event);
@@ -493,7 +532,7 @@ final class CanvasHandlerManager implements ClickHandler, DoubleClickHandler,
 
   private final Shape<?> findShapeAtPoint(int x, int y)
   {
-    return m_lienzo.getViewport().findShapeAtPoint(x, y);
+    return canvas.getViewport().findShapeAtPoint(x, y);
   }
 
   // ---------------------------------------------------------------------------
@@ -503,13 +542,15 @@ final class CanvasHandlerManager implements ClickHandler, DoubleClickHandler,
     if(m_dragging)
     {
       doDragMove(event);
-      m_lienzo.setCursor(Cursor.DEFAULT);
+      canvas.setCursor(Cursor.DEFAULT);
       m_dragnode.setVisible(true);
       m_dragContext.dragDone();
 
       m_dragnode.getLayer().draw();
-      m_lienzo.getDragLayer().clear();
-      m_dragnode.fireEvent(new NodeDragEndEvent(m_dragContext));
+      canvas.getDragLayer().clear();
+      NodeDragEndEvent nEvt = new NodeDragEndEvent(m_dragContext);
+      uiController.onNodeDragEnd(nEvt);
+      m_dragnode.fireEvent(nEvt);
       m_dragnode = null;
 
       m_dragging = false;
@@ -524,15 +565,17 @@ final class CanvasHandlerManager implements ClickHandler, DoubleClickHandler,
   {
     if(m_dragging)
       doDragCancel(event);
-    m_lienzo.setCursor(Cursor.CROSSHAIR);
+    canvas.setCursor(Cursor.CROSSHAIR);
     m_dragContext = new DragContext(event, node);
     m_dragnode = node;
-    m_dragnode.fireEvent(new NodeDragStartEvent(m_dragContext));
+    NodeDragStartEvent nEvt = new NodeDragStartEvent(m_dragContext);
+    uiController.onNodeDragStart(nEvt);
+    m_dragnode.fireEvent(nEvt);
     m_dragging = true;
 
     m_dragnode.setVisible(false);
     m_dragnode.getLayer().draw();
-    m_dragContext.drawNode(m_lienzo.getDragLayer().getContext());
+    m_dragContext.drawNode(canvas.getDragLayer().getContext());
     m_dragging_dispatch_move =
       m_dragnode.isEventHandled(NodeDragMoveEvent.getType());
     m_dragging_using_touches =
@@ -545,18 +588,15 @@ final class CanvasHandlerManager implements ClickHandler, DoubleClickHandler,
 
   private final void doDragMove(INodeXYEvent event)
   {
-    m_lienzo.getDragLayer().clear();
+    canvas.getDragLayer().clear();
     m_dragContext.dragUpdate(event);
 
     if(m_dragging_dispatch_move)
     {
       m_dragnode.fireEvent(new NodeDragMoveEvent(m_dragContext));
     }
-    // Draw after processing the drag move event
-    // First the graphics on the drag layer
-    m_lienzo.getDragLayer().draw();
-    // ... then the node that is being moved
-    m_dragContext.drawNode(m_lienzo.getDragLayer().getContext());
+    canvas.getDragLayer().draw();
+    m_dragContext.drawNode(canvas.getDragLayer().getContext());
   }
 
 
@@ -596,8 +636,7 @@ final class CanvasHandlerManager implements ClickHandler, DoubleClickHandler,
       if((null != prim) && (prim.isDraggable()) && (prim.isListening())
         && (prim.isVisible()))
       {
-        find = prim; // find the topmost draggable node, not necessarily the
-                     // first ancestor
+        find = prim;
       }
       node = node.getParent();
     }
@@ -630,15 +669,13 @@ final class CanvasHandlerManager implements ClickHandler, DoubleClickHandler,
     if((null != m_overprim)
       && (m_overprim.isEventHandled(NodeMouseExitEvent.getType())))
     {
-      m_overprim.fireEvent(new NodeMouseExitEvent(event.getX(), event.getY()));
+      fireNodeMouseExitEvent(event);
     }
     m_overprim = null;
   }
 
   // ---------------------------------------------------------------------------
 
-  // This will also return the shape under the cursor, for some optimization on
-  // Mouse Move
   private final Shape<?> doCheckEnterExitShape(INodeXYEvent event)
   {
     Shape<?> shape = findShapeAtPoint(event.getX(), event.getY());
@@ -651,8 +688,7 @@ final class CanvasHandlerManager implements ClickHandler, DoubleClickHandler,
         {
           if(m_overprim.isEventHandled(NodeMouseExitEvent.getType()))
           {
-            m_overprim.fireEvent(new NodeMouseExitEvent(event.getX(), event
-              .getY()));
+            fireNodeMouseExitEvent(event);
           }
         }
       }
@@ -661,7 +697,9 @@ final class CanvasHandlerManager implements ClickHandler, DoubleClickHandler,
         if((null != prim)
           && (prim.isEventHandled(NodeMouseEnterEvent.getType())))
         {
-          prim.fireEvent(new NodeMouseEnterEvent(event.getX(), event.getY()));
+          NodeMouseEnterEvent nEvt = new NodeMouseEnterEvent(event.getX(), event.getY());
+          uiController.onNodeMouseEnter(nEvt);
+          prim.fireEvent(nEvt);
         }
         m_overprim = prim;
       }
@@ -674,10 +712,19 @@ final class CanvasHandlerManager implements ClickHandler, DoubleClickHandler,
   }
 
   // ---------------------------------------------------------------------------
+  
+  private final void fireNodeMouseExitEvent(INodeXYEvent event)
+  {
+    NodeMouseExitEvent nEvt = new NodeMouseExitEvent(event.getX(), event.getY());
+    uiController.onNodeMouseExit(nEvt);
+    m_overprim.fireEvent(nEvt);
+  }
+  
+  // ---------------------------------------------------------------------------
 
   private final void fireEvent(GwtEvent<?> event)
   {
-    m_lienzo.getViewport().fireEvent(event);
+    canvas.getViewport().fireEvent(event);
   }
 
   // ---------------------------------------------------------------------------

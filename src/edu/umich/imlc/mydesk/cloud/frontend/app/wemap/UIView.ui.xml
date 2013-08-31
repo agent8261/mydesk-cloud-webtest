@@ -5,7 +5,7 @@
 <ui:UiBinder
   xmlns:ui="urn:ui:com.google.gwt.uibinder"
   xmlns:g="urn:import:com.google.gwt.user.client.ui"
-  xmlns:c='urn:import:edu.umich.imlc.mydesk.cloud.frontend.app.drawables'>
+  xmlns:c='urn:import:edu.umich.imlc.mydesk.cloud.frontend.app.wemap'>
   
 <ui:style field="css" src="res/cp_style.css"/>
 

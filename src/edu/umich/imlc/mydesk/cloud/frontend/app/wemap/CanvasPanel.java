@@ -1,4 +1,4 @@
-package edu.umich.imlc.mydesk.cloud.frontend.app.drawables;
+package edu.umich.imlc.mydesk.cloud.frontend.app.wemap;
 
 import com.emitrom.lienzo.client.core.LienzoGlobals;
 import com.emitrom.lienzo.client.core.event.OrientationChangeEvent;
@@ -30,7 +30,9 @@ import com.google.gwt.user.client.ui.Label;
  */
 public class CanvasPanel extends FocusPanel
 {
-  private final CanvasHandlerManager m_events;
+  private final UICanvasController m_events;
+  private final UIController uiController;
+  
   private final int m_wide;
   private final int m_high;
 
@@ -43,8 +45,9 @@ public class CanvasPanel extends FocusPanel
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
   
-  public CanvasPanel(int wide, int high)
+  public CanvasPanel(int wide, int high, UIController controller)
   {
+    uiController = controller;
     m_wide = wide;
     m_high = high;
     m_view = new Viewport(wide, high);
@@ -52,7 +55,7 @@ public class CanvasPanel extends FocusPanel
     {
       getElement().appendChild(m_view.getElement());
       setPixelSize(wide, high);
-      m_events = new CanvasHandlerManager(this);
+      m_events = new UICanvasController(this, uiController);
       initResizeTimer();
       Window.addResizeHandler(new CanvasResizeHandler());
     }
@@ -297,7 +300,7 @@ public class CanvasPanel extends FocusPanel
       }
 
       Scheduler.get().scheduleDeferred(new DeferedDrawCommand());
-    }
+    } // onResize
     
     class DeferedDrawCommand implements ScheduledCommand
     {

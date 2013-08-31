@@ -17,7 +17,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 import edu.umich.imlc.mydesk.cloud.frontend.app.canvas.AppStyle;
 import edu.umich.imlc.mydesk.cloud.frontend.app.canvas.DataCache;
-import edu.umich.imlc.mydesk.cloud.frontend.app.wemap.AppView_WeMap;
+import edu.umich.imlc.mydesk.cloud.frontend.app.wemap.UIController;
 import edu.umich.imlc.mydesk.cloud.frontend.app.wemap.App_WeMap;
 
 public class AppTestMain implements EntryPoint, ResizeHandler
@@ -48,7 +48,7 @@ public class AppTestMain implements EntryPoint, ResizeHandler
   int windowWidth = 0;
   int windowHeight = 0;
   
-  AppView_WeMap appMap = null;
+  UIController appMap = null;
   App_WeMap ctrlWeMap = null;
   
   // ---------------------------------------------------------------------------

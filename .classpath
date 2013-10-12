@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry excluding="edu/umich/imlc/mydesk/cloud/frontend/wesketch/web/" kind="src" path="src"/>
+	<classpathentry kind="src" path="protocol-buffer-utils"/>
+	<classpathentry kind="src" path="mydesk-common"/>
 	<classpathentry kind="src" path="Lienzo1_1"/>
-	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gin-2.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/guice-3.0.jar"/>
@@ -10,10 +11,9 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/javax.inject.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-fileupload-1.3.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/objectify-4.0b1.jar"/>
-	<classpathentry kind="src" path="MYDESK_COMMON"/>
-	<classpathentry kind="src" path="PROTOCOL_BUFFER_UTILS"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/protobuf.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/aopalliance.jar"/>
 	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
+	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

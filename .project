@@ -44,14 +44,14 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>MYDESK_COMMON</name>
+			<name>mydesk-common</name>
 			<type>2</type>
-			<locationURI>MYDESK_COMMON</locationURI>
+			<location>C:/Source_Code/mydesk-cloud-webtest/libs/mydesk-common/src</location>
 		</link>
 		<link>
-			<name>PROTOCOL_BUFFER_UTILS</name>
+			<name>protocol-buffer-utils</name>
 			<type>2</type>
-			<locationURI>PROTOCOL_BUFFER_UTILS</locationURI>
+			<location>C:/Source_Code/mydesk-cloud-webtest/libs/protocol-buffer-utils</location>
 		</link>
 	</linkedResources>
 </projectDescription>

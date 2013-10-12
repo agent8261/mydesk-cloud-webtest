@@ -68,11 +68,6 @@ public class CanvasPanel extends FocusPanel
 
   // ---------------------------------------------------------------------------
   
-  public void setEnableDragging(boolean toogle)
-  { m_events.setEnableDragging(toogle); }
-  
-  // ---------------------------------------------------------------------------
-  
   public CanvasPanel add(Layer layer)
   { getScene().add(layer); return this; }
 

@@ -79,7 +79,7 @@ import com.google.gwt.event.shared.GwtEvent.Type;
  * Responsible for handling user interaction with the Canvas panel
  * This is an based on LienzoHandlerManger
  */
-final class UICanvasController implements ClickHandler, DoubleClickHandler,
+final public class UICanvasController implements ClickHandler, DoubleClickHandler,
   MouseMoveHandler, MouseUpHandler, MouseDownHandler, MouseOutHandler,
   MouseOverHandler, MouseWheelHandler, TouchCancelHandler, TouchEndHandler,
   TouchMoveHandler, TouchStartHandler, GestureStartHandler, GestureEndHandler,

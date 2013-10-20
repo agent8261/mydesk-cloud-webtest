@@ -64,11 +64,10 @@ public class LienzoOvalNode implements DrawableObject
     titleShape.setID(oID);
     
     LienzoLayer layer = (LienzoLayer)drawingSurface;
-    // didn't need to do this anymore since we handle this in the canvascontroller & wemapcontrol
-    groupShape.addNodeDragStartHandler(layer.getNodeDragStartHandler());
-    groupShape.addNodeDragEndHandler(layer.getNodeDragEndHandler());
     groupShape.addNodeMouseEnterHandler(layer.getNodeMouseEnterHandler());
     groupShape.addNodeMouseExitHandler(layer.getNodeMouseExitHandler());
+    titleShape.addNodeMouseEnterHandler(layer.getNodeMouseEnterHandler());
+    titleShape.addNodeMouseExitHandler(layer.getNodeMouseExitHandler());
     
     layer.add(groupShape);
     Size s = calcEllipseSize(x, y);

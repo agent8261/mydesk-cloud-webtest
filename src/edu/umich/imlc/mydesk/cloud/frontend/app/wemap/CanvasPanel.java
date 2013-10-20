@@ -30,7 +30,7 @@ import com.google.gwt.user.client.ui.Label;
  */
 public class CanvasPanel extends FocusPanel
 {
-  private final UICanvasController m_events;
+  private final UICanvasController canvasController; // used to be named m_events
   private final UIController uiController;
   
   private final int m_wide;
@@ -55,15 +55,22 @@ public class CanvasPanel extends FocusPanel
     {
       getElement().appendChild(m_view.getElement());
       setPixelSize(wide, high);
-      m_events = new UICanvasController(this, uiController);
+      canvasController = new UICanvasController(this, uiController);
       initResizeTimer();
       Window.addResizeHandler(new CanvasResizeHandler());
     }
     else
     {
       add(new Label(MessageConstants.MESSAGES.getCanvasUnsupportedMessage()));
-      m_events = null;
+      canvasController = null;
     }
+  }
+  
+  // ---------------------------------------------------------------------------
+  
+  public UICanvasController getController()
+  {
+    return canvasController;
   }
 
   // ---------------------------------------------------------------------------

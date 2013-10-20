@@ -2,9 +2,13 @@ package edu.umich.imlc.mydesk.cloud.frontend.app.wemap;
 
 import com.emitrom.lienzo.client.core.event.AbstractNodeMouseEvent;
 import com.emitrom.lienzo.client.core.event.NodeDragEndEvent;
+import com.emitrom.lienzo.client.core.event.NodeDragEndHandler;
 import com.emitrom.lienzo.client.core.event.NodeDragStartEvent;
+import com.emitrom.lienzo.client.core.event.NodeDragStartHandler;
 import com.emitrom.lienzo.client.core.event.NodeMouseEnterEvent;
+import com.emitrom.lienzo.client.core.event.NodeMouseEnterHandler;
 import com.emitrom.lienzo.client.core.event.NodeMouseExitEvent;
+import com.emitrom.lienzo.client.core.event.NodeMouseExitHandler;
 import com.emitrom.lienzo.client.core.shape.GridLayer;
 import com.emitrom.lienzo.client.core.shape.IPrimitive;
 import com.emitrom.lienzo.client.core.shape.Line;
@@ -38,7 +42,8 @@ import edu.umich.imlc.mydesk.cloud.frontend.app.obj.GWT_Node;
  * Responsible for handling or delegating all user interaction
  */
 public class UIController extends ResizeComposite 
-  implements PresentersView
+  implements PresentersView, NodeDragEndHandler, NodeDragStartHandler,
+  NodeMouseEnterHandler, NodeMouseExitHandler
 {
   private static ViewUiBinder uiBinder = GWT.create(ViewUiBinder.class);
   
@@ -127,6 +132,10 @@ public class UIController extends ResizeComposite
   public void doInitDraw()
   {
     baseLayer = new LienzoLayer();
+    baseLayer.setNodeDragStartHandler(this);
+    baseLayer.setNodeDragEndHandler(this);
+    baseLayer.setNodeMouseEnterHandler(this);
+    baseLayer.setNodeMouseExitHandler(this);
     canvas.add(baseLayer);
     
     line1 = new Line(0, 0, 0, 0).setStrokeColor(ColorName.BLUE)
@@ -279,6 +288,7 @@ public class UIController extends ResizeComposite
     objID = ((Node<?>) node).getID();
     startX = node.getX();
     startY = node.getY();
+    nodeNotePnl.hide();
   }
 
   // ---------------------------------------------------------------------------

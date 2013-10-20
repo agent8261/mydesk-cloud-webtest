@@ -53,7 +53,8 @@ public class NodeNotePanel extends Composite
   
   public void hide()
   {
-    popupPnl.hide();
+    if(popupPnl.isShowing())
+    {  popupPnl.hide();  }
   }
   
   // ---------------------------------------------------------------------------

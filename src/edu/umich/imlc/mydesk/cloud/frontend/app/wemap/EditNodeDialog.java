@@ -101,11 +101,10 @@ public class EditNodeDialog extends Composite
   
   public void show()
   {
-    if(isEditing)
-    {
-      isEditing = false;
-      dialogBox.setTitle(CREATE_TITLE);
-    }
+    isEditing = false;
+    dialogBox.setTitle(CREATE_TITLE);
+    tboxTitle.setText(""); tboxNote.setText("");
+    setCurrentColor(DEFAULT_COLOR);
     dialogBox.setPopupPositionAndShow(this);
   }
   
